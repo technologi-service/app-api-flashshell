@@ -19,7 +19,7 @@ Un pedido pasa de la app del cliente a la pantalla del chef en menos de 500ms, c
 **Flash-Consumer (Pedidos)**
 - [ ] Cliente puede ver el menú con precios y disponibilidad en tiempo real
 - [ ] Cliente puede crear un pedido con múltiples ítems
-- [ ] Cliente puede pagar el pedido vía procesador integrado (TBD: research)
+- [ ] Cliente puede pagar el pedido vía Stripe (Payment Intent + webhook)
 - [ ] Cliente puede ver el estado del pedido y ubicación del repartidor en tiempo real
 
 **Flash-KDS (Cocina)**
@@ -41,7 +41,7 @@ Un pedido pasa de la app del cliente a la pantalla del chef en menos de 500ms, c
 - [ ] Admin puede ver todos los pedidos activos y su estado global
 
 **Infraestructura transversal**
-- [ ] Autenticación con provider externo (TBD: research) con roles: customer | chef | delivery | admin
+- [ ] Autenticación con Better Auth con roles: customer | chef | delivery | admin
 - [ ] Sincronización en tiempo real vía Neon LISTEN/NOTIFY → WebSocket broadcast
 - [ ] Estructura modular por pilar lista para evolucionar a multi-tenant
 
@@ -74,8 +74,8 @@ El dominio "dark kitchen" implica operación de alta velocidad: múltiples pedid
 |----------|-----------|---------|
 | Monolito modular (no microservicios) | El equipo arranca solo; las fronteras de módulo permiten extraer servicios después sin reescribir | — Pending |
 | Neon LISTEN/NOTIFY en lugar de Redis | Elimina una dependencia, reduce costos, suficiente para v1 single-tenant | — Pending |
-| Auth provider externo (TBD) | Evita construir auth propio; permite roles complejos sin reinventar la rueda | — Pending |
-| Procesador de pagos TBD (LATAM) | MercadoPago vs Stripe vs otro depende de disponibilidad regional y fees — a resolver en research | — Pending |
+| Better Auth para autenticación | Auth TypeScript-first, compatible con Bun, sin vendor lock-in pesado; roles custom directamente en el token | — Pending |
+| Stripe para pagos | API robusta, SDK fetch-based compatible con Bun, webhook system maduro para idempotencia | — Pending |
 | Single-tenant v1 | Simplifica el modelo de datos; el diseño mantiene `tenant_id` para migración futura sin romper esquema | — Pending |
 
 ---
