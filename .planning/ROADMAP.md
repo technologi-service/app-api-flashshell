@@ -28,7 +28,7 @@ Five phases build the FlashShell backend from a bare Bun + Elysia bootstrap to a
   3. A request with a valid token but insufficient role (e.g., `customer` hitting a chef-only endpoint) receives a 403
   4. The WebSocket hub is connected to Neon via `DATABASE_DIRECT_URL`, and a manual `NOTIFY test_channel` in psql causes the hub to log the event within 1 second
   5. All database tables exist in Neon with migrations tracked in version-controlled files; `bun run db:migrate` is idempotent
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
 - [ ] 01-01: Schema, migrations, and Drizzle ORM setup
