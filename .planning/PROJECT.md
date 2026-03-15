@@ -67,6 +67,7 @@ El dominio "dark kitchen" implica operación de alta velocidad: múltiples pedid
 - **Single-tenant**: v1 opera para una sola dark kitchen. Multi-tenant es diseño futuro, no implementación presente
 - **Real-time sin Redis**: La sincronización usa Neon LISTEN/NOTIFY + WebSocket nativo de Elysia
 - **GPS**: Las coordenadas llegan desde la app móvil del repartidor (push), no se consultan a terceros
+- **Elysia plugin pattern**: Cada pilar y módulo transversal se implementa como `new Elysia({ prefix })` registrado con `.use()`. Nunca código de dominio suelto en `index.ts`.
 
 ## Key Decisions
 

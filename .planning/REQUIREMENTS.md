@@ -19,7 +19,7 @@
 - [ ] **CONS-02**: Usuario puede crear un pedido con uno o más ítems validando stock disponible en el momento del request
 - [ ] **CONS-03**: La creación de pedido usa `SELECT FOR UPDATE` para evitar race conditions de stock en pedidos concurrentes
 - [ ] **CONS-04**: Usuario puede iniciar el pago de un pedido con Stripe (Payment Intent) y el sistema confirma el pedido al recibir el webhook de Stripe
-- [ ] **CONS-05**: El webhook de Stripe es idempotente — reintentos de Stripe no crean pedidos duplicados
+- [ ] **CONS-05**: El webhook de Stripe es idempotente — reintentos no crean pedidos duplicados
 - [ ] **CONS-06**: Usuario puede suscribirse por WebSocket al estado de su pedido y recibir actualizaciones en tiempo real (confirmed → preparing → ready → delivered)
 - [ ] **CONS-07**: Usuario autenticado puede ver el historial de sus pedidos anteriores
 
@@ -77,41 +77,39 @@
 
 ## Traceability
 
-_Populated during roadmap creation._
-
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INFRA-01 | — | Pending |
-| INFRA-02 | — | Pending |
-| INFRA-03 | — | Pending |
-| INFRA-04 | — | Pending |
-| INFRA-05 | — | Pending |
-| CONS-01 | — | Pending |
-| CONS-02 | — | Pending |
-| CONS-03 | — | Pending |
-| CONS-04 | — | Pending |
-| CONS-05 | — | Pending |
-| CONS-06 | — | Pending |
-| CONS-07 | — | Pending |
-| KDS-01 | — | Pending |
-| KDS-02 | — | Pending |
-| KDS-03 | — | Pending |
-| KDS-04 | — | Pending |
-| KDS-05 | — | Pending |
-| LOGI-01 | — | Pending |
-| LOGI-02 | — | Pending |
-| LOGI-03 | — | Pending |
-| LOGI-04 | — | Pending |
-| CTRL-01 | — | Pending |
-| CTRL-02 | — | Pending |
-| CTRL-03 | — | Pending |
-| CTRL-04 | — | Pending |
+| INFRA-01 | Phase 1 | Pending |
+| INFRA-02 | Phase 1 | Pending |
+| INFRA-03 | Phase 1 | Pending |
+| INFRA-04 | Phase 1 | Pending |
+| INFRA-05 | Phase 1 | Pending |
+| CONS-01 | Phase 2 | Pending |
+| CONS-02 | Phase 2 | Pending |
+| CONS-03 | Phase 2 | Pending |
+| CONS-04 | Phase 5 | Pending |
+| CONS-05 | Phase 5 | Pending |
+| CONS-06 | Phase 2 | Pending |
+| CONS-07 | Phase 2 | Pending |
+| KDS-01 | Phase 2 | Pending |
+| KDS-02 | Phase 2 | Pending |
+| KDS-03 | Phase 2 | Pending |
+| KDS-04 | Phase 2 | Pending |
+| KDS-05 | Phase 2 | Pending |
+| LOGI-01 | Phase 3 | Pending |
+| LOGI-02 | Phase 3 | Pending |
+| LOGI-03 | Phase 3 | Pending |
+| LOGI-04 | Phase 3 | Pending |
+| CTRL-01 | Phase 4 | Pending |
+| CTRL-02 | Phase 4 | Pending |
+| CTRL-03 | Phase 4 | Pending |
+| CTRL-04 | Phase 4 | Pending |
 
 **Coverage:**
 - v1 requirements: 25 total
-- Mapped to phases: 0 (pending roadmap)
-- Unmapped: 25 ⚠
+- Mapped to phases: 25
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-15*
-*Last updated: 2026-03-15 after initial definition*
+*Last updated: 2026-03-15 — traceability populated after roadmap creation*
