@@ -1,12 +1,13 @@
 // src/index.ts
 // RULE: This file mounts plugins only. No routes, no business logic, no DB queries.
 // All domain logic lives in src/plugins/ subdirectories.
+// Plugin registration order matters in Elysia — onError must be registered before plugins.
 import { Elysia } from 'elysia'
 import { authPlugin } from './plugins/auth/index'
-// wsPlugin and healthPlugin are wired in Plan 01-03
+import { healthPlugin } from './plugins/health/index'
+import { wsPlugin } from './plugins/ws/index'
 
 const app = new Elysia()
-  .use(authPlugin)
   .onError(({ code, error, set }) => {
     if (code === 'VALIDATION') {
       set.status = 422
@@ -25,6 +26,10 @@ const app = new Elysia()
     return { error: 'INTERNAL_ERROR', message: 'An unexpected error occurred' }
     // IMPORTANT: Never expose (error as any).stack in production responses
   })
+  .use(authPlugin)    // Better Auth at /auth/**, session macro available to all child plugins
+  .use(healthPlugin)  // GET /health — unprotected
+  .use(wsPlugin)      // WebSocket at /ws/:channel — auth-gated
+  // Phase 2+ plugins are registered here: .use(consumerPlugin), .use(kdsPlugin), etc.
   .listen(3000)
 
 console.log(`FlashShell Engine running at ${app.server?.hostname}:${app.server?.port}`)
