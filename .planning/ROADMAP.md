@@ -31,7 +31,7 @@ Five phases build the FlashShell backend from a bare Bun + Elysia bootstrap to a
 **Plans**: 3 plans
 
 Plans:
-- [ ] 01-01: Schema, migrations, and Drizzle ORM setup
+- [x] 01-01: Schema, migrations, and Drizzle ORM setup
 - [ ] 01-02: Better Auth integration with role-based middleware
 - [ ] 01-03: WebSocket hub with Neon LISTEN/NOTIFY and supervised reconnection
 
@@ -104,7 +104,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 0/3 | Not started | - |
+| 1. Foundation | 1/3 | In progress | - |
 | 2. Core Order Pipeline | 0/3 | Not started | - |
 | 3. Logistics | 0/2 | Not started | - |
 | 4. Admin and Control | 0/2 | Not started | - |

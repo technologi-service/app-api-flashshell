@@ -7,7 +7,7 @@
 
 ### Infrastructure
 
-- [ ] **INFRA-01**: El sistema provee un esquema de base de datos completo con migraciones versionadas (Drizzle ORM + Neon)
+- [x] **INFRA-01**: El sistema provee un esquema de base de datos completo con migraciones versionadas (Drizzle ORM + Neon)
 - [ ] **INFRA-02**: Todos los endpoints validan el cuerpo de la petición contra schemas TypeBox y retornan errores descriptivos
 - [ ] **INFRA-03**: El sistema autentica usuarios con Better Auth y expone roles: `customer | chef | delivery | admin`
 - [ ] **INFRA-04**: Un middleware central rechaza peticiones sin token válido o con rol insuficiente en todos los endpoints protegidos
@@ -79,7 +79,7 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INFRA-01 | Phase 1 | Pending |
+| INFRA-01 | Phase 1 | Complete |
 | INFRA-02 | Phase 1 | Pending |
 | INFRA-03 | Phase 1 | Pending |
 | INFRA-04 | Phase 1 | Pending |
