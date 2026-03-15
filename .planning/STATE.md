@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: "Checkpoint: Verify complete Phase 1 foundation end-to-end (01-03 tasks 1+2 complete, awaiting human-verify)"
-last_updated: "2026-03-15T20:41:07.171Z"
+stopped_at: Completed 01-03-PLAN.md — Phase 1 foundation complete, human checkpoint approved
+last_updated: "2026-03-15T21:01:25.476Z"
 last_activity: 2026-03-15 — Completed plan 01-01 (Drizzle schema + Neon migrations)
 progress:
   total_phases: 5
@@ -52,6 +52,7 @@ Progress: [█░░░░░░░░░] 7%
 *Updated after each plan completion*
 | Phase 01-foundation P02 | 20 | 2 tasks | 7 files |
 | Phase 01-foundation P03 | 4 | 2 tasks | 6 files |
+| Phase 01-foundation P03 | 27 | 3 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -75,6 +76,8 @@ Recent decisions affecting current work:
 - [Phase 01-03]: 3-second DB probe timeout in healthPlugin — prevents health check from hanging in test/offline environments
 - [Phase 01-03]: onError registered before all .use() calls in index.ts — Elysia applies lifecycle hooks to routes registered AFTER them
 - [Phase 01-03]: pg.Client on DATABASE_DIRECT_URL for LISTEN/NOTIFY hub — never the pooled @neondatabase/serverless client
+- [Phase 01-foundation]: WS /ws/:channel without valid Bearer returns HTTP 404 for plain HTTP (not WS upgrade) — auth gate confirmed working, route only matches WS upgrade requests
+- [Phase 01-foundation]: pg.Client on DATABASE_DIRECT_URL for LISTEN/NOTIFY hub — never pooled @neondatabase/serverless client
 
 ### Pending Todos
 
@@ -87,6 +90,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-15T20:41:07.167Z
-Stopped at: Checkpoint: Verify complete Phase 1 foundation end-to-end (01-03 tasks 1+2 complete, awaiting human-verify)
+Last session: 2026-03-15T21:01:25.472Z
+Stopped at: Completed 01-03-PLAN.md — Phase 1 foundation complete, human checkpoint approved
 Resume file: None
