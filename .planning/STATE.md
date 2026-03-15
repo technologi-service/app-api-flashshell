@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 01-02-PLAN.md
-last_updated: "2026-03-15T20:30:58.031Z"
+stopped_at: "Checkpoint: Verify complete Phase 1 foundation end-to-end (01-03 tasks 1+2 complete, awaiting human-verify)"
+last_updated: "2026-03-15T20:41:07.171Z"
 last_activity: 2026-03-15 — Completed plan 01-01 (Drizzle schema + Neon migrations)
 progress:
   total_phases: 5
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 3
-  completed_plans: 2
+  completed_plans: 3
   percent: 7
 ---
 
@@ -51,6 +51,7 @@ Progress: [█░░░░░░░░░] 7%
 
 *Updated after each plan completion*
 | Phase 01-foundation P02 | 20 | 2 tasks | 7 files |
+| Phase 01-foundation P03 | 4 | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -71,6 +72,9 @@ Recent decisions affecting current work:
 - [Phase 01-02]: requireRole no-op when user absent: returns undefined instead of 401 so non-auth routes are not blocked by role guard
 - [Phase 01-02]: DATABASE_URL deferred to first query via placeholder fallback in neon() call — allows unit tests to import db client without live DB
 - [Phase 01-02]: Better Auth table name is 'user' (lowercase, quoted) — seed-admin.ts uses UPDATE "user" SET role='admin' accordingly
+- [Phase 01-03]: 3-second DB probe timeout in healthPlugin — prevents health check from hanging in test/offline environments
+- [Phase 01-03]: onError registered before all .use() calls in index.ts — Elysia applies lifecycle hooks to routes registered AFTER them
+- [Phase 01-03]: pg.Client on DATABASE_DIRECT_URL for LISTEN/NOTIFY hub — never the pooled @neondatabase/serverless client
 
 ### Pending Todos
 
@@ -83,6 +87,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-15T20:30:58.027Z
-Stopped at: Completed 01-02-PLAN.md
+Last session: 2026-03-15T20:41:07.167Z
+Stopped at: Checkpoint: Verify complete Phase 1 foundation end-to-end (01-03 tasks 1+2 complete, awaiting human-verify)
 Resume file: None

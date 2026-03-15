@@ -10,7 +10,7 @@ Five phases build the FlashShell backend from a bare Bun + Elysia bootstrap to a
 - Integer phases (1, 2, 3): Planned milestone work
 - Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
 
-- [ ] **Phase 1: Foundation** - Database schema, auth middleware, WebSocket hub infrastructure
+- [x] **Phase 1: Foundation** - Database schema, auth middleware, WebSocket hub infrastructure (completed 2026-03-15)
 - [ ] **Phase 2: Core Order Pipeline** - Consumer order creation + KDS real-time delivery (the 500ms SLA)
 - [ ] **Phase 3: Logistics** - Courier pickup list, GPS broadcast, delivery state machine
 - [ ] **Phase 4: Admin and Control** - Active order dashboard, stock alerts, cash flow report
@@ -104,7 +104,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 2/3 | In Progress|  |
+| 1. Foundation | 3/3 | Complete   | 2026-03-15 |
 | 2. Core Order Pipeline | 0/3 | Not started | - |
 | 3. Logistics | 0/2 | Not started | - |
 | 4. Admin and Control | 0/2 | Not started | - |

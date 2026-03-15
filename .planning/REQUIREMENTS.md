@@ -11,7 +11,7 @@
 - [x] **INFRA-02**: Todos los endpoints validan el cuerpo de la petición contra schemas TypeBox y retornan errores descriptivos
 - [x] **INFRA-03**: El sistema autentica usuarios con Better Auth y expone roles: `customer | chef | delivery | admin`
 - [x] **INFRA-04**: Un middleware central rechaza peticiones sin token válido o con rol insuficiente en todos los endpoints protegidos
-- [ ] **INFRA-05**: El servidor mantiene una conexión WebSocket hub usando Neon `DATABASE_DIRECT_URL` con LISTEN/NOTIFY y reconexión supervisada automática ante caídas
+- [x] **INFRA-05**: El servidor mantiene una conexión WebSocket hub usando Neon `DATABASE_DIRECT_URL` con LISTEN/NOTIFY y reconexión supervisada automática ante caídas
 
 ### Flash-Consumer (Pedidos)
 
@@ -83,7 +83,7 @@
 | INFRA-02 | Phase 1 | Complete |
 | INFRA-03 | Phase 1 | Complete |
 | INFRA-04 | Phase 1 | Complete |
-| INFRA-05 | Phase 1 | Pending |
+| INFRA-05 | Phase 1 | Complete |
 | CONS-01 | Phase 2 | Pending |
 | CONS-02 | Phase 2 | Pending |
 | CONS-03 | Phase 2 | Pending |
