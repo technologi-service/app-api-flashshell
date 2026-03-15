@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 01-01-PLAN.md
-last_updated: "2026-03-15T20:30:00.000Z"
+stopped_at: Completed 01-02-PLAN.md
+last_updated: "2026-03-15T20:30:58.031Z"
 last_activity: 2026-03-15 — Completed plan 01-01 (Drizzle schema + Neon migrations)
 progress:
   total_phases: 5
   completed_phases: 0
-  total_plans: 15
-  completed_plans: 1
+  total_plans: 3
+  completed_plans: 2
   percent: 7
 ---
 
@@ -50,6 +50,7 @@ Progress: [█░░░░░░░░░] 7%
 - Trend: baseline established
 
 *Updated after each plan completion*
+| Phase 01-foundation P02 | 20 | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -67,6 +68,9 @@ Recent decisions affecting current work:
 - [01-01] Better Auth tables managed by Drizzle adapter — src/db/schema/auth.ts intentionally empty
 - [01-01] Two-URL Neon pattern: DATABASE_URL (pooled) for queries, DATABASE_DIRECT_URL (direct) for migrations
 - [01-01] courierLocations uses courierId as PK for upsert-by-PK pattern (max 1 row per courier)
+- [Phase 01-02]: requireRole no-op when user absent: returns undefined instead of 401 so non-auth routes are not blocked by role guard
+- [Phase 01-02]: DATABASE_URL deferred to first query via placeholder fallback in neon() call — allows unit tests to import db client without live DB
+- [Phase 01-02]: Better Auth table name is 'user' (lowercase, quoted) — seed-admin.ts uses UPDATE "user" SET role='admin' accordingly
 
 ### Pending Todos
 
@@ -79,6 +83,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-15T20:30:00.000Z
-Stopped at: Completed 01-01-PLAN.md
-Resume file: .planning/phases/01-foundation/01-02-PLAN.md
+Last session: 2026-03-15T20:30:58.027Z
+Stopped at: Completed 01-02-PLAN.md
+Resume file: None
