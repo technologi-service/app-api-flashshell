@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 02-core-order-pipeline 02-01-PLAN.md
-last_updated: "2026-03-16T09:39:44.877Z"
+stopped_at: Completed 02-core-order-pipeline 02-02-PLAN.md
+last_updated: "2026-03-16T13:50:06.130Z"
 last_activity: 2026-03-16 — Phase 1 verified and approved; Phase 2 ready to begin
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 6
-  completed_plans: 4
+  completed_plans: 5
   percent: 20
 ---
 
@@ -61,6 +61,7 @@ Progress: [██░░░░░░░░] 20%
 
 *Updated after each plan completion*
 | Phase 02-core-order-pipeline P01 | 4 | 3 tasks | 7 files |
+| Phase 02-core-order-pipeline P02 | 15 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -89,6 +90,8 @@ Recent decisions affecting current work:
 - [Phase 02-01]: FOR UPDATE OF i targets only ingredients rows — allows concurrent menu reads while serializing stock mutations
 - [Phase 02-01]: pg_notify fires inside transaction before COMMIT so KDS notification and order confirmation are atomic
 - [Phase 02-01]: Test fixtures must use valid UUID strings — TypeBox format: 'uuid' validation rejects non-UUID values
+- [Phase 02-02]: neon-http db.execute result shape: check both .rows?.length and Array.isArray(result) for advance rowCount
+- [Phase 02-02]: kdsPlugin: auto-advance only fires logistics/kds notifies when UPDATE rowCount > 0 — prevents duplicate notify on concurrent requests
 
 ### Pending Todos
 
@@ -106,7 +109,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-16T09:39:44.875Z
-Stopped at: Completed 02-core-order-pipeline 02-01-PLAN.md
+Last session: 2026-03-16T13:50:06.126Z
+Stopped at: Completed 02-core-order-pipeline 02-02-PLAN.md
 Resume file: None
 Next action: Begin Phase 2 planning (`/gsd:plan-phase 02`)

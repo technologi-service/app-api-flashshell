@@ -20,16 +20,16 @@
 - [x] **CONS-03**: La creación de pedido usa `SELECT FOR UPDATE` para evitar race conditions de stock en pedidos concurrentes
 - [ ] **CONS-04**: Usuario puede iniciar el pago de un pedido con Stripe (Payment Intent) y el sistema confirma el pedido al recibir el webhook de Stripe
 - [ ] **CONS-05**: El webhook de Stripe es idempotente — reintentos no crean pedidos duplicados
-- [ ] **CONS-06**: Usuario puede suscribirse por WebSocket al estado de su pedido y recibir actualizaciones en tiempo real (confirmed → preparing → ready → delivered)
+- [x] **CONS-06**: Usuario puede suscribirse por WebSocket al estado de su pedido y recibir actualizaciones en tiempo real (confirmed → preparing → ready → delivered)
 - [ ] **CONS-07**: Usuario autenticado puede ver el historial de sus pedidos anteriores
 
 ### Flash-KDS (Cocina)
 
 - [x] **KDS-01**: Chef autenticado recibe una notificación WebSocket en tiempo real (<500ms) cuando llega un pedido nuevo
-- [ ] **KDS-02**: Chef puede marcar un ítem individual como "en preparación" (PATCH /orders/:id/items/:itemId → `preparing`)
-- [ ] **KDS-03**: Chef puede marcar un ítem individual como "listo" (PATCH /orders/:id/items/:itemId → `ready`)
-- [ ] **KDS-04**: Chef puede marcar un pedido completo como "listo para retiro" (PATCH /orders/:id → `ready`), lo que notifica a Logistics
-- [ ] **KDS-05**: Chef puede activar o desactivar un plato del menú; el cambio se refleja en tiempo real para los clientes activos
+- [x] **KDS-02**: Chef puede marcar un ítem individual como "en preparación" (PATCH /orders/:id/items/:itemId → `preparing`)
+- [x] **KDS-03**: Chef puede marcar un ítem individual como "listo" (PATCH /orders/:id/items/:itemId → `ready`)
+- [x] **KDS-04**: Chef puede marcar un pedido completo como "listo para retiro" (PATCH /orders/:id → `ready`), lo que notifica a Logistics
+- [x] **KDS-05**: Chef puede activar o desactivar un plato del menú; el cambio se refleja en tiempo real para los clientes activos
 
 ### Flash-Logistics (Entrega)
 
@@ -89,13 +89,13 @@
 | CONS-03 | Phase 2 | Complete |
 | CONS-04 | Phase 5 | Pending |
 | CONS-05 | Phase 5 | Pending |
-| CONS-06 | Phase 2 | Pending |
+| CONS-06 | Phase 2 | Complete |
 | CONS-07 | Phase 2 | Pending |
 | KDS-01 | Phase 2 | Complete |
-| KDS-02 | Phase 2 | Pending |
-| KDS-03 | Phase 2 | Pending |
-| KDS-04 | Phase 2 | Pending |
-| KDS-05 | Phase 2 | Pending |
+| KDS-02 | Phase 2 | Complete |
+| KDS-03 | Phase 2 | Complete |
+| KDS-04 | Phase 2 | Complete |
+| KDS-05 | Phase 2 | Complete |
 | LOGI-01 | Phase 3 | Pending |
 | LOGI-02 | Phase 3 | Pending |
 | LOGI-03 | Phase 3 | Pending |
