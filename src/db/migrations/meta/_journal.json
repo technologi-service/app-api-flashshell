@@ -8,6 +8,20 @@
       "when": 1773605254456,
       "tag": "0000_neat_barracuda",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1773608238336,
+      "tag": "0001_wet_purple_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1773653695060,
+      "tag": "0002_add_item_status",
+      "breakpoints": true
     }
   ]
 }

@@ -12,6 +12,8 @@ export const orderStatusEnum = pgEnum('order_status', [
   'cancelled'
 ])
 
+export const itemStatusEnum = pgEnum('item_status', ['pending', 'preparing', 'ready'])
+
 export const orders = pgTable('orders', {
   id: uuid('id').primaryKey().defaultRandom(),
   customerId: uuid('customer_id').notNull(),
@@ -27,5 +29,6 @@ export const orderItems = pgTable('order_items', {
   orderId: uuid('order_id').notNull().references(() => orders.id, { onDelete: 'cascade' }),
   menuItemId: uuid('menu_item_id').notNull().references(() => menuItems.id),
   quantity: integer('quantity').notNull(),
-  unitPrice: numeric('unit_price', { precision: 10, scale: 2 }).notNull()
+  unitPrice: numeric('unit_price', { precision: 10, scale: 2 }).notNull(),
+  itemStatus: itemStatusEnum('item_status').notNull().default('pending')
 })
