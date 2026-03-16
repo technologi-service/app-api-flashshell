@@ -7,10 +7,12 @@ import { eq } from 'drizzle-orm'
 import { sql } from 'drizzle-orm'
 
 // pg.Pool for transactional queries (SELECT FOR UPDATE requires persistent connection)
-// Use DATABASE_URL (pooled). Neon PgBouncer transaction mode preserves session within BEGIN/COMMIT.
-// If FOR UPDATE fails with pooler error, switch to DATABASE_DIRECT_URL and document here.
+// Uses DATABASE_DIRECT_URL (not the pooled URL) because Neon PgBouncer transaction mode
+// does not preserve row locks (SELECT FOR UPDATE) across queries within a transaction —
+// different queries in the same BEGIN/COMMIT block can land on different backend connections.
+// DATABASE_DIRECT_URL bypasses PgBouncer and connects directly to the Neon compute instance.
 const txPool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: process.env.DATABASE_DIRECT_URL ?? process.env.DATABASE_URL,
   max: 5
 })
 
