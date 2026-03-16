@@ -45,12 +45,12 @@ Plans:
   3. Authenticated chef receives a WebSocket push event within 500ms of a new order being created, containing the order ID and items
   4. Chef calls `PATCH /kds/orders/:id/items/:itemId` to move an item through `preparing` → `ready`; customer subscribed via WebSocket receives each status change in real time
   5. Chef calls `PATCH /kds/menu/:itemId/availability` to toggle a dish inactive; the menu endpoint immediately reflects the change for all subsequent customer requests
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 02-01: Flash-Consumer plugin — menu endpoint and order creation with SELECT FOR UPDATE
-- [ ] 02-02: Flash-KDS plugin — order queue, item/order status controls, availability toggle
-- [ ] 02-03: WebSocket channels — consumer order tracking and KDS real-time push
+- [ ] 02-01-PLAN.md — Migration (item_status) + Flash-Consumer plugin (GET /menu, POST /orders)
+- [ ] 02-02-PLAN.md — Flash-KDS plugin (order queue, item status controls, availability toggle)
+- [ ] 02-03-PLAN.md — Order history endpoint, plugin wiring in index.ts, concurrency integration test
 
 ### Phase 3: Logistics
 **Goal**: A courier can pick up ready orders, and the customer sees the courier's live position until delivery
