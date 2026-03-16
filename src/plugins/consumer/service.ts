@@ -47,8 +47,21 @@ export async function createOrder(
     const menuItemIds = items.map(i => i.menuItemId)
 
     // Lock ingredient rows for all menu items in this order.
-    // FOR UPDATE OF i locks the ingredients rows; prevents concurrent stock depletion.
-    // LEFT JOIN handles menu items with no ingredients (no lock needed for them).
+    // Step 1: Lock ingredients rows directly to prevent concurrent stock depletion.
+    // We use a separate SELECT FOR UPDATE on ingredients via a subquery to avoid
+    // the PostgreSQL restriction that FOR UPDATE cannot target the nullable side
+    // of an outer join. Only locks rows where ingredients exist for the menu items.
+    await client.query(
+      `SELECT i.id FROM ingredients i
+       WHERE i.id IN (
+         SELECT mii.ingredient_id FROM menu_item_ingredients mii
+         WHERE mii.menu_item_id = ANY($1::uuid[])
+       )
+       FOR UPDATE`,
+      [menuItemIds]
+    )
+
+    // Step 2: Read menu item data with ingredient stock (no lock needed — already locked above).
     const { rows: menuRows } = await client.query<{
       menu_item_id: string
       name: string
@@ -69,8 +82,7 @@ export async function createOrder(
        FROM menu_items mi
        LEFT JOIN menu_item_ingredients mii ON mii.menu_item_id = mi.id
        LEFT JOIN ingredients i ON i.id = mii.ingredient_id
-       WHERE mi.id = ANY($1::uuid[])
-       FOR UPDATE OF i`,
+       WHERE mi.id = ANY($1::uuid[])`,
       [menuItemIds]
     )
 
