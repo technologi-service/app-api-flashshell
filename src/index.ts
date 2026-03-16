@@ -33,3 +33,10 @@ const app = new Elysia()
   .listen(3000)
 
 console.log(`FlashShell Engine running at ${app.server?.hostname}:${app.server?.port}`)
+
+/**
+ * Eden Treaty type export.
+ * The frontend's src/lib/api.ts imports this type via the @backend/index path alias.
+ * This is a type-only export — no runtime code is included in the frontend bundle.
+ */
+export type App = typeof app
