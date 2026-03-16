@@ -6,6 +6,8 @@ import { Elysia } from 'elysia'
 import { authPlugin } from './plugins/auth/index'
 import { healthPlugin } from './plugins/health/index'
 import { wsPlugin } from './plugins/ws/index'
+import { consumerPlugin } from './plugins/consumer/index'
+import { kdsPlugin } from './plugins/kds/index'
 
 const app = new Elysia()
   .onError(({ code, error, set }) => {
@@ -29,7 +31,9 @@ const app = new Elysia()
   .use(authPlugin)    // Better Auth at /auth/**, session macro available to all child plugins
   .use(healthPlugin)  // GET /health — unprotected
   .use(wsPlugin)      // WebSocket at /ws/:channel — auth-gated
-  // Phase 2+ plugins are registered here: .use(consumerPlugin), .use(kdsPlugin), etc.
+  .use(consumerPlugin)
+  .use(kdsPlugin)
+  // Phase 3+ plugins registered here: .use(logisticsPlugin), etc.
   .listen(3000)
 
 console.log(`FlashShell Engine running at ${app.server?.hostname}:${app.server?.port}`)

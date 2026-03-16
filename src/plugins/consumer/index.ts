@@ -3,7 +3,7 @@ import { Elysia } from 'elysia'
 import { authPlugin } from '../auth/index'
 import { requireRole } from '../auth/require-role'
 import { CreateOrderBody } from './model'
-import { createOrder, getActiveMenu } from './service'
+import { createOrder, getActiveMenu, getOrderHistory } from './service'
 
 export const consumerPlugin = new Elysia({ name: 'consumer', prefix: '/consumer' })
   .use(authPlugin)
@@ -23,4 +23,9 @@ export const consumerPlugin = new Elysia({ name: 'consumer', prefix: '/consumer'
       return result.order
     },
     { auth: true, body: CreateOrderBody }
+  )
+  .get(
+    '/orders',
+    async ({ user }) => getOrderHistory(user.id),
+    { auth: true }
   )

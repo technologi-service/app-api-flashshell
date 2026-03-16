@@ -2,7 +2,9 @@
 import { Pool } from 'pg'
 import { db } from '../../db/client'
 import { menuItems } from '../../db/schema/menu'
+import { orders } from '../../db/schema/orders'
 import { eq } from 'drizzle-orm'
+import { sql } from 'drizzle-orm'
 
 // pg.Pool for transactional queries (SELECT FOR UPDATE requires persistent connection)
 // Use DATABASE_URL (pooled). Neon PgBouncer transaction mode preserves session within BEGIN/COMMIT.
@@ -210,4 +212,17 @@ export async function getActiveMenu() {
     price: menuItems.price,
     isAvailable: menuItems.isAvailable
   }).from(menuItems).where(eq(menuItems.isAvailable, true))
+}
+
+export async function getOrderHistory(customerId: string) {
+  return db
+    .select({
+      id: orders.id,
+      status: orders.status,
+      totalAmount: orders.totalAmount,
+      createdAt: orders.createdAt
+    })
+    .from(orders)
+    .where(eq(orders.customerId, customerId))
+    .orderBy(sql`${orders.createdAt} DESC`)
 }
