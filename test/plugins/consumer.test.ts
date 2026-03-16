@@ -24,9 +24,19 @@ const mockCreateOrder = mock(async () => ({
   }
 }))
 
+const mockGetOrderHistory = mock(async () => [
+  {
+    id: 'order-1',
+    status: 'confirmed',
+    totalAmount: '10.00',
+    createdAt: new Date('2026-01-01T00:00:00Z')
+  }
+])
+
 mock.module('../../src/plugins/consumer/service', () => ({
   getActiveMenu: mockGetActiveMenu,
-  createOrder: mockCreateOrder
+  createOrder: mockCreateOrder,
+  getOrderHistory: mockGetOrderHistory
 }))
 
 // Mock authPlugin to inject a customer user context
@@ -120,5 +130,32 @@ describe('POST /consumer/orders (CONS-02)', () => {
       })
     )
     expect(res.status).toBe(422)
+  })
+})
+
+describe('GET /consumer/orders (CONS-07)', () => {
+  it('returns 200 with order history for the authenticated customer', async () => {
+    const res = await testApp.handle(
+      new Request('http://localhost/consumer/orders', {
+        headers: { Authorization: 'Bearer test-token' }
+      })
+    )
+    expect(res.status).toBe(200)
+    const body = await res.json() as any[]
+    expect(Array.isArray(body)).toBe(true)
+    expect(body[0]).toHaveProperty('id')
+    expect(body[0]).toHaveProperty('status')
+    expect(body[0]).toHaveProperty('totalAmount')
+    expect(body[0]).toHaveProperty('createdAt')
+  })
+
+  it('calls getOrderHistory with the authenticated user id', async () => {
+    mockGetOrderHistory.mockClear()
+    await testApp.handle(
+      new Request('http://localhost/consumer/orders', {
+        headers: { Authorization: 'Bearer test-token' }
+      })
+    )
+    expect(mockGetOrderHistory).toHaveBeenCalledWith('user-1')
   })
 })
