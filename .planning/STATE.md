@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 2 context gathered
-last_updated: "2026-03-16T09:04:10.935Z"
+stopped_at: Completed 02-core-order-pipeline 02-01-PLAN.md
+last_updated: "2026-03-16T09:39:44.877Z"
 last_activity: 2026-03-16 — Phase 1 verified and approved; Phase 2 ready to begin
 progress:
   total_phases: 5
   completed_phases: 1
-  total_plans: 3
-  completed_plans: 3
+  total_plans: 6
+  completed_plans: 4
   percent: 20
 ---
 
@@ -60,6 +60,7 @@ Progress: [██░░░░░░░░] 20%
 - Trend: accelerating as patterns established
 
 *Updated after each plan completion*
+| Phase 02-core-order-pipeline P01 | 4 | 3 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -84,6 +85,10 @@ Recent decisions affecting current work:
 - [Phase 01-03]: onError registered before all .use() calls in index.ts — Elysia applies lifecycle hooks to routes registered AFTER them
 - [Phase 01-03]: pg.Client on DATABASE_DIRECT_URL for LISTEN/NOTIFY hub — never the pooled @neondatabase/serverless client
 - [Phase 01-foundation]: WS /ws/:channel without valid Bearer returns HTTP 404 for plain HTTP (not WS upgrade) — auth gate confirmed working, route only matches WS upgrade requests
+- [Phase 02-01]: pg.Pool (max:5) on DATABASE_URL for SELECT FOR UPDATE transactions — Neon PgBouncer transaction mode preserves BEGIN/COMMIT within a single connection
+- [Phase 02-01]: FOR UPDATE OF i targets only ingredients rows — allows concurrent menu reads while serializing stock mutations
+- [Phase 02-01]: pg_notify fires inside transaction before COMMIT so KDS notification and order confirmation are atomic
+- [Phase 02-01]: Test fixtures must use valid UUID strings — TypeBox format: 'uuid' validation rejects non-UUID values
 
 ### Pending Todos
 
@@ -101,7 +106,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-16T09:04:10.933Z
-Stopped at: Phase 2 context gathered
-Resume file: .planning/phases/02-core-order-pipeline/02-CONTEXT.md
+Last session: 2026-03-16T09:39:44.875Z
+Stopped at: Completed 02-core-order-pipeline 02-01-PLAN.md
+Resume file: None
 Next action: Begin Phase 2 planning (`/gsd:plan-phase 02`)
