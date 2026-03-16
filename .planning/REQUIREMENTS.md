@@ -21,7 +21,7 @@
 - [ ] **CONS-04**: Usuario puede iniciar el pago de un pedido con Stripe (Payment Intent) y el sistema confirma el pedido al recibir el webhook de Stripe
 - [ ] **CONS-05**: El webhook de Stripe es idempotente — reintentos no crean pedidos duplicados
 - [x] **CONS-06**: Usuario puede suscribirse por WebSocket al estado de su pedido y recibir actualizaciones en tiempo real (confirmed → preparing → ready → delivered)
-- [ ] **CONS-07**: Usuario autenticado puede ver el historial de sus pedidos anteriores
+- [x] **CONS-07**: Usuario autenticado puede ver el historial de sus pedidos anteriores
 
 ### Flash-KDS (Cocina)
 
@@ -90,7 +90,7 @@
 | CONS-04 | Phase 5 | Pending |
 | CONS-05 | Phase 5 | Pending |
 | CONS-06 | Phase 2 | Complete |
-| CONS-07 | Phase 2 | Pending |
+| CONS-07 | Phase 2 | Complete |
 | KDS-01 | Phase 2 | Complete |
 | KDS-02 | Phase 2 | Complete |
 | KDS-03 | Phase 2 | Complete |
