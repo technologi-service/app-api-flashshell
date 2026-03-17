@@ -61,11 +61,11 @@ Plans:
   2. Courier app pushes GPS coordinates to `POST /couriers/location`; the coordinate is persisted to the database at most every 30 seconds and broadcast via WebSocket to the customer who has that courier's active order
   3. Customer subscribed to their order WebSocket channel receives live GPS coordinate updates from the courier without polling
   4. Courier calls `PATCH /logistics/orders/:id/status` to advance state from `picked_up` to `delivered`; the customer and admin both receive a WebSocket notification for each transition
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 03-01: Flash-Logistics plugin — pickup list, GPS ingestion, delivery state machine
-- [ ] 03-02: GPS broadcast — WebSocket channel for customer location tracking
+- [ ] 03-01-PLAN.md — Migration + schema + consumer extension + logistics plugin (pickup list, delivery state machine)
+- [ ] 03-02-PLAN.md — Couriers plugin (GPS ingestion + broadcast), plugin wiring, concurrency integration test
 
 ### Phase 4: Admin and Control
 **Goal**: Admin has full operational visibility — live order board, automatic stock deductions, low-stock alerts, and cash flow summary
