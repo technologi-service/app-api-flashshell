@@ -1,0 +1,36 @@
+// src/plugins/payments/index.ts
+// IMPORTANT: No body schema on /stripe route — intentional.
+// Schema parsing would corrupt the raw body needed for Stripe HMAC-SHA256 signature verification.
+// Stripe calls this endpoint directly (no auth).
+import { Elysia } from 'elysia'
+import { stripe, handlePaymentSucceeded } from './service'
+import type Stripe from 'stripe'
+
+export const paymentsPlugin = new Elysia({ name: 'payments', prefix: '/webhooks' })
+  .post('/stripe', async ({ request, set }) => {
+    // CRITICAL: call request.text() BEFORE any body parsing
+    const rawBody = await request.text()
+    const signature = request.headers.get('stripe-signature') ?? ''
+
+    let event: Stripe.Event
+    try {
+      event = await stripe.webhooks.constructEventAsync(
+        rawBody,
+        signature,
+        process.env.STRIPE_WEBHOOK_SECRET!
+      )
+    } catch (err) {
+      set.status = 400
+      return { error: 'INVALID_SIGNATURE', message: 'Webhook signature verification failed' }
+    }
+
+    if (event.type === 'payment_intent.succeeded') {
+      const result = await handlePaymentSucceeded(event.data.object as Stripe.PaymentIntent)
+      if (!result.ok && result.error === 'ALREADY_PROCESSED') {
+        // Idempotent — Stripe retry, already handled
+        return { received: true, duplicate: true }
+      }
+    }
+
+    return { received: true }
+  })
