@@ -91,11 +91,11 @@ Plans:
   2. Stripe delivers a `payment.approved` webhook; the order status changes from `pending` to `confirmed`, and the customer's WebSocket channel receives the confirmation
   3. Stripe delivers the same `payment.approved` webhook a second time (retry simulation); the order status does not change and no duplicate order is created
   4. A webhook with an invalid HMAC-SHA256 signature is rejected with 400 before any database write occurs
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 05-01: Stripe SDK integration and payment_intents state machine
-- [ ] 05-02: Webhook endpoint with HMAC verification and idempotency logic
+- [ ] 05-01-PLAN.md — Stripe SDK + payment_intents migration + POST /orders/:id/pay + createOrder status change to 'pending'
+- [ ] 05-02-PLAN.md — Webhook endpoint with HMAC verification, idempotency guard, WS notification, plugin wiring
 
 ## Progress
 
