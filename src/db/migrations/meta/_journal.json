@@ -36,6 +36,13 @@
       "when": 1773825900000,
       "tag": "0004_stock_trigger",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1773827508636,
+      "tag": "0005_payment_intents",
+      "breakpoints": true
     }
   ]
 }
