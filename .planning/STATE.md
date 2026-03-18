@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 3 context gathered
-last_updated: "2026-03-17T22:59:42.082Z"
+stopped_at: Completed 03-01-PLAN.md
+last_updated: "2026-03-18T08:43:20.457Z"
 last_activity: 2026-03-16 — Phase 1 verified and approved; Phase 2 ready to begin
 progress:
   total_phases: 5
   completed_phases: 2
-  total_plans: 6
-  completed_plans: 6
+  total_plans: 8
+  completed_plans: 7
   percent: 20
 ---
 
@@ -63,6 +63,7 @@ Progress: [██░░░░░░░░] 20%
 | Phase 02-core-order-pipeline P01 | 4 | 3 tasks | 7 files |
 | Phase 02-core-order-pipeline P02 | 15 | 2 tasks | 4 files |
 | Phase 02-core-order-pipeline P03 | 13 | 2 tasks | 5 files |
+| Phase 03-logistics P01 | 4 | 2 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -96,6 +97,9 @@ Recent decisions affecting current work:
 - [Phase 02-03]: txPool switched to DATABASE_DIRECT_URL: Neon PgBouncer transaction mode does not preserve SELECT FOR UPDATE locks — direct connection required
 - [Phase 02-03]: FOR UPDATE OF i replaced with two-step locking: separate SELECT...FOR UPDATE on ingredients subquery — PostgreSQL rejects FOR UPDATE on nullable side of outer join
 - [Phase 02-03]: Integration tests use direct pg.Pool implementation to avoid Bun 1.3.9 mock.module() contamination across test files
+- [Phase 03-01]: courier_id is text (not uuid) in migration to match user.id text PK — no Drizzle .references() to avoid type mismatch
+- [Phase 03-01]: advanceOrderStatus uses txPool on DATABASE_DIRECT_URL — PgBouncer does not preserve SELECT FOR UPDATE locks across queries
+- [Phase 03-01]: Partial index on (status, courier_id) WHERE unclaimed+open statuses for O(log n) pickup list query performance
 
 ### Pending Todos
 
@@ -113,7 +117,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-17T22:59:42.077Z
-Stopped at: Phase 3 context gathered
-Resume file: .planning/phases/03-logistics/03-CONTEXT.md
+Last session: 2026-03-18T08:43:20.453Z
+Stopped at: Completed 03-01-PLAN.md
+Resume file: None
 Next action: Begin Phase 2 planning (`/gsd:plan-phase 02`)
