@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 03-02-PLAN.md
-last_updated: "2026-03-18T08:54:20.603Z"
+stopped_at: Completed 04-01-PLAN.md
+last_updated: "2026-03-18T09:23:35.169Z"
 last_activity: 2026-03-16 — Phase 1 verified and approved; Phase 2 ready to begin
 progress:
   total_phases: 5
   completed_phases: 3
-  total_plans: 8
-  completed_plans: 8
+  total_plans: 10
+  completed_plans: 9
   percent: 20
 ---
 
@@ -65,6 +65,7 @@ Progress: [██░░░░░░░░] 20%
 | Phase 02-core-order-pipeline P03 | 13 | 2 tasks | 5 files |
 | Phase 03-logistics P01 | 4 | 2 tasks | 11 files |
 | Phase 03-logistics P02 | 4 | 2 tasks | 7 files |
+| Phase 04-admin-and-control P01 | 5 | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -103,6 +104,8 @@ Recent decisions affecting current work:
 - [Phase 03-01]: Partial index on (status, courier_id) WHERE unclaimed+open statuses for O(log n) pickup list query performance
 - [Phase 03-02]: GPS throttle check at service layer using updated_at column, no Redis required
 - [Phase 03-02]: Active-order check doubles as 403 auth guard and pg_notify orderId resolver
+- [Phase 04-01]: cashflow query filters WHERE o.status = 'confirmed' — only confirmed orders count as revenue
+- [Phase 04-01]: getCashflowReport joins menu_item_ingredients and ingredients for stock cost calculation (qty * quantity_used * cost_per_unit)
 
 ### Pending Todos
 
@@ -120,7 +123,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-18T08:50:48.823Z
-Stopped at: Completed 03-02-PLAN.md
+Last session: 2026-03-18T09:23:35.167Z
+Stopped at: Completed 04-01-PLAN.md
 Resume file: None
 Next action: Begin Phase 2 planning (`/gsd:plan-phase 02`)

@@ -42,8 +42,8 @@
 
 - [ ] **CTRL-01**: El stock de ingredientes se descuenta automáticamente cuando un pedido pasa a estado `confirmed` (trigger en DB, no lógica de aplicación)
 - [ ] **CTRL-02**: El sistema envía una notificación WebSocket al admin cuando el stock de cualquier ingrediente cae por debajo de su umbral crítico configurado
-- [ ] **CTRL-03**: Admin autenticado puede ver todos los pedidos activos con su estado actual en tiempo real vía WebSocket
-- [ ] **CTRL-04**: Admin puede consultar el flujo de caja del período actual: suma de ventas confirmadas vs. suma de costos de stock consumido
+- [x] **CTRL-03**: Admin autenticado puede ver todos los pedidos activos con su estado actual en tiempo real vía WebSocket
+- [x] **CTRL-04**: Admin puede consultar el flujo de caja del período actual: suma de ventas confirmadas vs. suma de costos de stock consumido
 
 ## v2 Requirements
 
@@ -102,8 +102,8 @@
 | LOGI-04 | Phase 3 | Complete |
 | CTRL-01 | Phase 4 | Pending |
 | CTRL-02 | Phase 4 | Pending |
-| CTRL-03 | Phase 4 | Pending |
-| CTRL-04 | Phase 4 | Pending |
+| CTRL-03 | Phase 4 | Complete |
+| CTRL-04 | Phase 4 | Complete |
 
 **Coverage:**
 - v1 requirements: 25 total
