@@ -29,7 +29,10 @@ mock.module('../../src/plugins/payments/service', () => ({
       constructEventAsync: mockConstructEventAsync
     }
   },
-  handlePaymentSucceeded: mockHandlePaymentSucceeded
+  handlePaymentSucceeded: mockHandlePaymentSucceeded,
+  // Include createPaymentIntent to avoid mock contamination in consumer.test.ts
+  // when Bun 1.3.9 shares module registry across test files
+  createPaymentIntent: mock(async () => ({ ok: false, error: 'MOCK_NOT_USED' }))
 }))
 
 const { paymentsPlugin } = await import('../../src/plugins/payments/index')

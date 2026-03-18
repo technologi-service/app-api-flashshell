@@ -14,6 +14,7 @@ import { kdsPlugin } from './plugins/kds/index'
 import { logisticsPlugin } from './plugins/logistics/index'
 import { couriersPlugin } from './plugins/couriers/index'
 import { controlPlugin } from './plugins/control/index'
+import { paymentsPlugin } from './plugins/payments/index'
 
 // Extract Better Auth OpenAPI schema — only runs in development
 // Pattern from: .agents/skills/elysiajs/integrations/better-auth.md
@@ -66,7 +67,8 @@ const app = new Elysia()
         { name: 'kds', description: 'Kitchen Display System endpoints' },
         { name: 'logistics', description: 'Courier delivery logistics' },
         { name: 'couriers', description: 'Courier GPS tracking' },
-        { name: 'control', description: 'Admin order dashboard and reports' }
+        { name: 'control', description: 'Admin order dashboard and reports' },
+        { name: 'payments', description: 'Stripe payment webhooks' }
       ],
       components: isDev ? await BetterAuthOpenAPI.components : {},
       paths: isDev ? await BetterAuthOpenAPI.getPaths() : {}
@@ -98,6 +100,7 @@ const app = new Elysia()
   .use(logisticsPlugin)
   .use(couriersPlugin)
   .use(controlPlugin)
+  .use(paymentsPlugin)   // POST /webhooks/stripe — no auth (Stripe calls directly)
   .listen(3000)
 
 console.log(`FlashShell Engine running at ${app.server?.hostname}:${app.server?.port}`)
