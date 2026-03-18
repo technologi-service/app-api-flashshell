@@ -4,6 +4,7 @@
 // Plugin registration order matters in Elysia — onError must be registered before plugins.
 import { Elysia } from 'elysia'
 import { openapi } from '@elysiajs/openapi'
+import { cors } from '@elysiajs/cors'
 import { auth } from './plugins/auth/better-auth'
 import { authPlugin } from './plugins/auth/index'
 import { healthPlugin } from './plugins/health/index'
@@ -36,7 +37,19 @@ const BetterAuthOpenAPI = {
 
 const isDev = process.env.NODE_ENV !== 'production'
 
+// CORS origins from env — supports comma-separated list for multiple frontends
+const corsOrigins = (process.env.CORS_ORIGINS ?? 'http://localhost:5173')
+  .split(',')
+  .map(o => o.trim())
+  .filter(Boolean)
+
 const app = new Elysia()
+  .use(cors({
+    origin: corsOrigins,
+    credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']
+  }))
   .use(openapi({
     enabled: isDev,
     documentation: {
