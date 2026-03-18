@@ -83,8 +83,8 @@ async function createOrderDirect(
 
     // Insert order
     const { rows: orderRows } = await client.query<{ id: string }>(
-      `INSERT INTO orders (customer_id, status, total_amount)
-       VALUES ($1, 'confirmed', $2)
+      `INSERT INTO orders (customer_id, status, total_amount, delivery_address)
+       VALUES ($1, 'confirmed', $2, '')
        RETURNING id`,
       [customerId, ing.price]
     )
