@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 04-01-PLAN.md
-last_updated: "2026-03-18T09:23:35.169Z"
+stopped_at: Completed 04-02-PLAN.md
+last_updated: "2026-03-18T09:31:03.157Z"
 last_activity: 2026-03-16 — Phase 1 verified and approved; Phase 2 ready to begin
 progress:
   total_phases: 5
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 10
-  completed_plans: 9
+  completed_plans: 10
   percent: 20
 ---
 
@@ -66,6 +66,7 @@ Progress: [██░░░░░░░░] 20%
 | Phase 03-logistics P01 | 4 | 2 tasks | 11 files |
 | Phase 03-logistics P02 | 4 | 2 tasks | 7 files |
 | Phase 04-admin-and-control P01 | 5 | 2 tasks | 5 files |
+| Phase 04-admin-and-control P02 | 5 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -106,6 +107,9 @@ Recent decisions affecting current work:
 - [Phase 03-02]: Active-order check doubles as 403 auth guard and pg_notify orderId resolver
 - [Phase 04-01]: cashflow query filters WHERE o.status = 'confirmed' — only confirmed orders count as revenue
 - [Phase 04-01]: getCashflowReport joins menu_item_ingredients and ingredients for stock cost calculation (qty * quantity_used * cost_per_unit)
+- [Phase 04-admin-and-control]: [Phase 04-02]: statement-breakpoint separators required between SQL statements in neon-http Drizzle migrations — multi-statement files fail with 'cannot insert multiple commands into a prepared statement'
+- [Phase 04-admin-and-control]: [Phase 04-02]: Drizzle neon-http migrator orders by journal 'when' timestamp — must be chronologically after prior entries or migration is silently skipped
+- [Phase 04-admin-and-control]: [Phase 04-02]: PERFORM pg_notify() (not SELECT) required in PL/pgSQL trigger functions; LOW.status != 'confirmed' guard prevents double-deduction
 
 ### Pending Todos
 
@@ -123,7 +127,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-18T09:23:35.167Z
-Stopped at: Completed 04-01-PLAN.md
+Last session: 2026-03-18T09:31:03.155Z
+Stopped at: Completed 04-02-PLAN.md
 Resume file: None
 Next action: Begin Phase 2 planning (`/gsd:plan-phase 02`)
