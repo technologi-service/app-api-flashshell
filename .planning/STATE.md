@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 04-02-PLAN.md
-last_updated: "2026-03-18T09:34:11.581Z"
+stopped_at: Completed 05-01-PLAN.md
+last_updated: "2026-03-18T09:56:52.692Z"
 last_activity: 2026-03-16 — Phase 1 verified and approved; Phase 2 ready to begin
 progress:
   total_phases: 5
   completed_phases: 4
-  total_plans: 10
-  completed_plans: 10
+  total_plans: 12
+  completed_plans: 11
   percent: 20
 ---
 
@@ -67,6 +67,7 @@ Progress: [██░░░░░░░░] 20%
 | Phase 03-logistics P02 | 4 | 2 tasks | 7 files |
 | Phase 04-admin-and-control P01 | 5 | 2 tasks | 5 files |
 | Phase 04-admin-and-control P02 | 5 | 2 tasks | 3 files |
+| Phase 05-payments P01 | 5 | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -110,6 +111,8 @@ Recent decisions affecting current work:
 - [Phase 04-admin-and-control]: [Phase 04-02]: statement-breakpoint separators required between SQL statements in neon-http Drizzle migrations — multi-statement files fail with 'cannot insert multiple commands into a prepared statement'
 - [Phase 04-admin-and-control]: [Phase 04-02]: Drizzle neon-http migrator orders by journal 'when' timestamp — must be chronologically after prior entries or migration is silently skipped
 - [Phase 04-admin-and-control]: [Phase 04-02]: PERFORM pg_notify() (not SELECT) required in PL/pgSQL trigger functions; LOW.status != 'confirmed' guard prevents double-deduction
+- [Phase 05-01]: Manual SQL migration over db:generate: snapshots 0003/0004 missing caused wrong diff; manually wrote correct CREATE TABLE payment_intents DDL
+- [Phase 05-01]: createOrder returns 'pending' status and KDS pg_notify removed — deferred to Plan 05-02 webhook handler after Stripe payment_intent.succeeded
 
 ### Pending Todos
 
@@ -127,7 +130,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-18T09:31:03.155Z
-Stopped at: Completed 04-02-PLAN.md
+Last session: 2026-03-18T09:56:52.690Z
+Stopped at: Completed 05-01-PLAN.md
 Resume file: None
 Next action: Begin Phase 2 planning (`/gsd:plan-phase 02`)

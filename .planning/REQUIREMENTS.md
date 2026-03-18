@@ -18,7 +18,7 @@
 - [x] **CONS-01**: Usuario puede obtener el menú completo con precio, descripción y disponibilidad en tiempo real (activo/inactivo)
 - [x] **CONS-02**: Usuario puede crear un pedido con uno o más ítems validando stock disponible en el momento del request
 - [x] **CONS-03**: La creación de pedido usa `SELECT FOR UPDATE` para evitar race conditions de stock en pedidos concurrentes
-- [ ] **CONS-04**: Usuario puede iniciar el pago de un pedido con Stripe (Payment Intent) y el sistema confirma el pedido al recibir el webhook de Stripe
+- [x] **CONS-04**: Usuario puede iniciar el pago de un pedido con Stripe (Payment Intent) y el sistema confirma el pedido al recibir el webhook de Stripe
 - [ ] **CONS-05**: El webhook de Stripe es idempotente — reintentos no crean pedidos duplicados
 - [x] **CONS-06**: Usuario puede suscribirse por WebSocket al estado de su pedido y recibir actualizaciones en tiempo real (confirmed → preparing → ready → delivered)
 - [x] **CONS-07**: Usuario autenticado puede ver el historial de sus pedidos anteriores
@@ -87,7 +87,7 @@
 | CONS-01 | Phase 2 | Complete |
 | CONS-02 | Phase 2 | Complete |
 | CONS-03 | Phase 2 | Complete |
-| CONS-04 | Phase 5 | Pending |
+| CONS-04 | Phase 5 | Complete |
 | CONS-05 | Phase 5 | Pending |
 | CONS-06 | Phase 2 | Complete |
 | CONS-07 | Phase 2 | Complete |

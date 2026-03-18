@@ -108,4 +108,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 2. Core Order Pipeline | 2/3 | In Progress|  |
 | 3. Logistics | 2/2 | Complete   | 2026-03-18 |
 | 4. Admin and Control | 2/2 | Complete   | 2026-03-18 |
-| 5. Payments | 0/2 | Not started | - |
+| 5. Payments | 1/2 | In Progress|  |
