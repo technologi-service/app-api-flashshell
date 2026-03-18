@@ -14,13 +14,37 @@ export async function getActiveOrders() {
 
   const orderIds = activeOrders.map(o => o.id)
   const items = await db
-    .select()
+    .select({
+      id: orderItems.id,
+      orderId: orderItems.orderId,
+      menuItemId: orderItems.menuItemId,
+      quantity: orderItems.quantity,
+      unitPrice: orderItems.unitPrice,
+      itemStatus: orderItems.itemStatus,
+      name: menuItems.name,
+    })
     .from(orderItems)
+    .leftJoin(menuItems, eq(orderItems.menuItemId, menuItems.id))
     .where(inArray(orderItems.orderId, orderIds))
 
   return activeOrders.map(order => ({
-    ...order,
-    items: items.filter(i => i.orderId === order.id)
+    id: order.id,
+    customerId: order.customerId,
+    status: order.status,
+    totalAmount: order.totalAmount,
+    deliveryAddress: order.deliveryAddress,
+    createdAt: order.createdAt,
+    updatedAt: order.updatedAt,
+    items: items
+      .filter(i => i.orderId === order.id)
+      .map(i => ({
+        id: i.id,
+        menuItemId: i.menuItemId,
+        quantity: i.quantity,
+        unitPrice: i.unitPrice,
+        itemStatus: i.itemStatus,
+        name: i.name ?? 'Ítem sin nombre',
+      })),
   }))
 }
 
