@@ -157,14 +157,13 @@ export async function createOrder(
       return sum + price * item.quantity
     }, 0).toFixed(2)
 
-    const { rows: orderRows } = await client.query<{ id: string; created_at: string }>(
+    const { rows: orderRows } = await client.query<{ id: string }>(
       `INSERT INTO orders (customer_id, status, total_amount, delivery_address)
-       VALUES ($1, 'confirmed', $2, $3)
-       RETURNING id, created_at`,
+       VALUES ($1, 'pending', $2, $3)
+       RETURNING id`,
       [customerId, totalAmount, deliveryAddress]
     )
     const orderId = orderRows[0].id
-    const createdAt = orderRows[0].created_at
 
     // Insert order items
     const orderItemsResult: CreatedOrder['items'] = []
@@ -184,22 +183,8 @@ export async function createOrder(
       })
     }
 
-    // Notify KDS — inside transaction, before COMMIT.
-    // pg_notify must be inside the transaction so notify and commit are atomic.
-    await client.query(
-      `SELECT pg_notify('flashshell_events', $1::text)`,
-      [JSON.stringify({
-        channel: 'kds',
-        event: 'new_order',
-        orderId,
-        createdAt,
-        items: orderItemsResult.map(i => ({
-          itemId: i.itemId,
-          name: i.name,
-          quantity: i.quantity
-        }))
-      })]
-    )
+    // KDS pg_notify is deferred to Plan 05-02 webhook handler —
+    // orders are now 'pending' until Stripe payment_intent.succeeded is received.
 
     await client.query('COMMIT')
 
@@ -207,7 +192,7 @@ export async function createOrder(
       ok: true,
       order: {
         id: orderId,
-        status: 'confirmed',
+        status: 'pending',
         totalAmount,
         deliveryAddress,
         items: orderItemsResult

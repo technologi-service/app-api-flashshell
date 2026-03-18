@@ -18,11 +18,16 @@ const mockCreateOrder = mock(async (): Promise<{ ok: true; order: { id: string; 
   ok: true,
   order: {
     id: ORDER_UUID,
-    status: 'confirmed',
+    status: 'pending',
     totalAmount: '10.00',
     deliveryAddress: '123 Main St',
     items: [{ itemId: ORDER_ITEM_UUID, name: 'Burger', quantity: 1, unitPrice: '10.00' }]
   }
+}))
+
+const mockCreatePaymentIntent = mock(async () => ({
+  ok: true as const,
+  clientSecret: 'pi_test_secret_123'
 }))
 
 const mockGetOrderHistory = mock(async () => [
@@ -38,6 +43,10 @@ mock.module('../../src/plugins/consumer/service', () => ({
   getActiveMenu: mockGetActiveMenu,
   createOrder: mockCreateOrder,
   getOrderHistory: mockGetOrderHistory
+}))
+
+mock.module('../../src/plugins/payments/service', () => ({
+  createPaymentIntent: mockCreatePaymentIntent
 }))
 
 // Mock authPlugin to inject a customer user context
@@ -78,7 +87,7 @@ describe('GET /consumer/menu (CONS-01)', () => {
 })
 
 describe('POST /consumer/orders (CONS-02)', () => {
-  it('returns order with confirmed status and full shape', async () => {
+  it('returns order with pending status and full shape', async () => {
     const res = await testApp.handle(
       new Request('http://localhost/consumer/orders', {
         method: 'POST',
@@ -91,7 +100,7 @@ describe('POST /consumer/orders (CONS-02)', () => {
     )
     expect(res.status).toBe(200)
     const body = await res.json() as any
-    expect(body.status).toBe('confirmed')
+    expect(body.status).toBe('pending')
     expect(body).toHaveProperty('id')
     expect(body).toHaveProperty('totalAmount')
     expect(Array.isArray(body.items)).toBe(true)
@@ -158,5 +167,48 @@ describe('GET /consumer/orders (CONS-07)', () => {
       })
     )
     expect(mockGetOrderHistory).toHaveBeenCalledWith('user-1')
+  })
+})
+
+describe('POST /consumer/orders/:id/pay (CONS-04)', () => {
+  it('returns 200 with clientSecret for a pending order', async () => {
+    const res = await testApp.handle(
+      new Request(`http://localhost/consumer/orders/${ORDER_UUID}/pay`, {
+        method: 'POST',
+        headers: { Authorization: 'Bearer test-token' }
+      })
+    )
+    expect(res.status).toBe(200)
+    const body = await res.json() as any
+    expect(body).toHaveProperty('clientSecret')
+    expect(body.clientSecret).toBe('pi_test_secret_123')
+  })
+
+  it('returns 404 when order not found', async () => {
+    mockCreatePaymentIntent.mockImplementationOnce(async () => ({
+      ok: false as const,
+      error: 'ORDER_NOT_FOUND'
+    }))
+    const res = await testApp.handle(
+      new Request(`http://localhost/consumer/orders/${ORDER_UUID}/pay`, {
+        method: 'POST',
+        headers: { Authorization: 'Bearer test-token' }
+      })
+    )
+    expect(res.status).toBe(404)
+  })
+
+  it('returns 409 when order is not pending', async () => {
+    mockCreatePaymentIntent.mockImplementationOnce(async () => ({
+      ok: false as const,
+      error: 'ORDER_NOT_PENDING'
+    }))
+    const res = await testApp.handle(
+      new Request(`http://localhost/consumer/orders/${ORDER_UUID}/pay`, {
+        method: 'POST',
+        headers: { Authorization: 'Bearer test-token' }
+      })
+    )
+    expect(res.status).toBe(409)
   })
 })
