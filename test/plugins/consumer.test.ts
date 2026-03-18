@@ -14,12 +14,13 @@ const ORDER_ITEM_UUID = '44444444-4444-4444-4444-444444444444'
 const mockGetActiveMenu = mock(async () => [
   { id: MENU_ITEM_UUID, name: 'Burger', description: 'A burger', price: '10.00', isAvailable: true }
 ])
-const mockCreateOrder = mock(async () => ({
+const mockCreateOrder = mock(async (): Promise<{ ok: true; order: { id: string; status: string; totalAmount: string; deliveryAddress: string; items: { itemId: string; name: string; quantity: number; unitPrice: string }[] } } | { ok: false; failures: string[] }> => ({
   ok: true,
   order: {
     id: ORDER_UUID,
     status: 'confirmed',
     totalAmount: '10.00',
+    deliveryAddress: '123 Main St',
     items: [{ itemId: ORDER_ITEM_UUID, name: 'Burger', quantity: 1, unitPrice: '10.00' }]
   }
 }))
@@ -85,7 +86,7 @@ describe('POST /consumer/orders (CONS-02)', () => {
           Authorization: 'Bearer test-token',
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ items: [{ menuItemId: MENU_ITEM_UUID, quantity: 1 }] })
+        body: JSON.stringify({ items: [{ menuItemId: MENU_ITEM_UUID, quantity: 1 }], deliveryAddress: '123 Main St' })
       })
     )
     expect(res.status).toBe(200)
@@ -108,7 +109,7 @@ describe('POST /consumer/orders (CONS-02)', () => {
           Authorization: 'Bearer test-token',
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ items: [{ menuItemId: UNAVAILABLE_ITEM_UUID, quantity: 1 }] })
+        body: JSON.stringify({ items: [{ menuItemId: UNAVAILABLE_ITEM_UUID, quantity: 1 }], deliveryAddress: '123 Main St' })
       })
     )
     expect(res.status).toBe(409)

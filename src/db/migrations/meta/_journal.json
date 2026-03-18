@@ -22,6 +22,13 @@
       "when": 1773653695060,
       "tag": "0002_add_item_status",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1773823109000,
+      "tag": "0003_add_courier_columns",
+      "breakpoints": true
     }
   ]
 }

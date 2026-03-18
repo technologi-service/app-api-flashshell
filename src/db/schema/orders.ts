@@ -1,5 +1,5 @@
 // src/db/schema/orders.ts
-import { pgTable, uuid, pgEnum, numeric, timestamp, integer } from 'drizzle-orm/pg-core'
+import { pgTable, uuid, pgEnum, numeric, timestamp, integer, text } from 'drizzle-orm/pg-core'
 import { menuItems } from './menu'
 
 export const orderStatusEnum = pgEnum('order_status', [
@@ -21,7 +21,9 @@ export const orders = pgTable('orders', {
   totalAmount: numeric('total_amount', { precision: 10, scale: 2 }).notNull(),
   tenantId: uuid('tenant_id'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull()
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  courierId: text('courier_id'),                    // nullable, FK to user.id (text PK)
+  deliveryAddress: text('delivery_address').notNull()
 })
 
 export const orderItems = pgTable('order_items', {

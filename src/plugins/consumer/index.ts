@@ -12,7 +12,7 @@ export const consumerPlugin = new Elysia({ name: 'consumer', prefix: '/consumer'
   .post(
     '/orders',
     async ({ body, user, status }) => {
-      const result = await createOrder(user.id, body.items)
+      const result = await createOrder(user.id, body.items, body.deliveryAddress)
       if (!result.ok) {
         return status(409, {
           error: 'CONFLICT',

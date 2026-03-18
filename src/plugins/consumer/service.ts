@@ -25,6 +25,7 @@ export interface CreatedOrder {
   id: string
   status: string
   totalAmount: string
+  deliveryAddress: string
   items: Array<{ itemId: string; name: string; quantity: number; unitPrice: string }>
 }
 
@@ -40,7 +41,8 @@ export type CreateOrderResult =
 
 export async function createOrder(
   customerId: string,
-  items: OrderItemInput[]
+  items: OrderItemInput[],
+  deliveryAddress: string
 ): Promise<CreateOrderResult> {
   const client = await txPool.connect()
   try {
@@ -156,10 +158,10 @@ export async function createOrder(
     }, 0).toFixed(2)
 
     const { rows: orderRows } = await client.query<{ id: string; created_at: string }>(
-      `INSERT INTO orders (customer_id, status, total_amount)
-       VALUES ($1, 'confirmed', $2)
+      `INSERT INTO orders (customer_id, status, total_amount, delivery_address)
+       VALUES ($1, 'confirmed', $2, $3)
        RETURNING id, created_at`,
-      [customerId, totalAmount]
+      [customerId, totalAmount, deliveryAddress]
     )
     const orderId = orderRows[0].id
     const createdAt = orderRows[0].created_at
@@ -207,6 +209,7 @@ export async function createOrder(
         id: orderId,
         status: 'confirmed',
         totalAmount,
+        deliveryAddress,
         items: orderItemsResult
       }
     }
