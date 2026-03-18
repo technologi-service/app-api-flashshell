@@ -13,6 +13,7 @@ import { consumerPlugin } from './plugins/consumer/index'
 import { kdsPlugin } from './plugins/kds/index'
 import { logisticsPlugin } from './plugins/logistics/index'
 import { couriersPlugin } from './plugins/couriers/index'
+import { controlPlugin } from './plugins/control/index'
 
 // Extract Better Auth OpenAPI schema — only runs in development
 // Pattern from: .agents/skills/elysiajs/integrations/better-auth.md
@@ -64,7 +65,8 @@ const app = new Elysia()
         { name: 'consumer', description: 'Consumer order endpoints' },
         { name: 'kds', description: 'Kitchen Display System endpoints' },
         { name: 'logistics', description: 'Courier delivery logistics' },
-        { name: 'couriers', description: 'Courier GPS tracking' }
+        { name: 'couriers', description: 'Courier GPS tracking' },
+        { name: 'control', description: 'Admin order dashboard and reports' }
       ],
       components: isDev ? await BetterAuthOpenAPI.components : {},
       paths: isDev ? await BetterAuthOpenAPI.getPaths() : {}
@@ -95,7 +97,7 @@ const app = new Elysia()
   .use(kdsPlugin)
   .use(logisticsPlugin)
   .use(couriersPlugin)
-  // Phase 4+ plugins registered here
+  .use(controlPlugin)
   .listen(3000)
 
 console.log(`FlashShell Engine running at ${app.server?.hostname}:${app.server?.port}`)
