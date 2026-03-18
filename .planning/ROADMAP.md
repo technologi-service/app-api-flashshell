@@ -76,11 +76,11 @@ Plans:
   2. Admin subscribed to the control WebSocket channel receives an alert within 2 seconds of any ingredient's stock falling below its configured critical threshold
   3. Admin calls `GET /control/orders/active` and receives all orders with status not in `{delivered, cancelled}`; the list updates in real time via WebSocket when any order changes state
   4. Admin calls `GET /control/reports/cashflow?from=DATE&to=DATE` and receives total confirmed revenue versus total stock cost consumed in that period
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 04-01: Flash-Control plugin — active order dashboard, cash flow report
-- [ ] 04-02: Stock trigger and low-stock alert WebSocket channel
+- [ ] 04-01-PLAN.md — Flash-Control plugin (active order dashboard, cash flow report)
+- [ ] 04-02-PLAN.md — Stock deduction trigger migration and low-stock alert integration tests
 
 ### Phase 5: Payments
 **Goal**: The payment loop is closed — customers pay via Stripe before their order is confirmed, and duplicate webhook deliveries never create duplicate orders
