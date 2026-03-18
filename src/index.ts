@@ -5,7 +5,6 @@
 import { Elysia } from 'elysia'
 import { openapi } from '@elysiajs/openapi'
 import { cors } from '@elysiajs/cors'
-import { auth } from './plugins/auth/better-auth'
 import { authPlugin } from './plugins/auth/index'
 import { healthPlugin } from './plugins/health/index'
 import { wsPlugin } from './plugins/ws/index'
@@ -15,27 +14,6 @@ import { logisticsPlugin } from './plugins/logistics/index'
 import { couriersPlugin } from './plugins/couriers/index'
 import { controlPlugin } from './plugins/control/index'
 import { paymentsPlugin } from './plugins/payments/index'
-
-// Extract Better Auth OpenAPI schema — only runs in development
-// Pattern from: .agents/skills/elysiajs/integrations/better-auth.md
-let _schema: ReturnType<typeof auth.api.generateOpenAPISchema>
-const getSchema = async () => (_schema ??= auth.api.generateOpenAPISchema())
-
-const BetterAuthOpenAPI = {
-  getPaths: (prefix = '/api/auth') =>
-    getSchema().then(({ paths }) => {
-      const reference: typeof paths = Object.create(null)
-      for (const path of Object.keys(paths)) {
-        const key = prefix + path
-        reference[key] = paths[path]
-        for (const method of Object.keys(paths[path])) {
-          ;(reference[key] as any)[method].tags = ['auth']
-        }
-      }
-      return reference
-    }) as Promise<any>,
-  components: getSchema().then(({ components }) => components) as Promise<any>
-} as const
 
 const isDev = process.env.NODE_ENV !== 'production'
 
@@ -69,9 +47,7 @@ const app = new Elysia()
         { name: 'couriers', description: 'Courier GPS tracking' },
         { name: 'control', description: 'Admin order dashboard and reports' },
         { name: 'payments', description: 'Stripe payment webhooks' }
-      ],
-      components: isDev ? await BetterAuthOpenAPI.components : {},
-      paths: isDev ? await BetterAuthOpenAPI.getPaths() : {}
+      ]
     }
   }))
   .onError(({ code, error, set }) => {
