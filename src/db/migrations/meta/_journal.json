@@ -29,6 +29,13 @@
       "when": 1773823109000,
       "tag": "0003_add_courier_columns",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1710720000000,
+      "tag": "0004_stock_trigger",
+      "breakpoints": true
     }
   ]
 }
