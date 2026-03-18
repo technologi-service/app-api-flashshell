@@ -34,8 +34,8 @@
 ### Flash-Logistics (Entrega)
 
 - [x] **LOGI-01**: Repartidor autenticado puede ver la lista de pedidos con estado `ready` disponibles para retirar
-- [ ] **LOGI-02**: App del repartidor puede enviar coordenadas GPS al backend (POST /couriers/location, upsert en `courier_location`, máximo cada 30s para prevenir bloat en DB)
-- [ ] **LOGI-03**: Las coordenadas GPS del repartidor se retransmiten en tiempo real por WebSocket al cliente que tiene el pedido activo
+- [x] **LOGI-02**: App del repartidor puede enviar coordenadas GPS al backend (POST /couriers/location, upsert en `courier_location`, máximo cada 30s para prevenir bloat en DB)
+- [x] **LOGI-03**: Las coordenadas GPS del repartidor se retransmiten en tiempo real por WebSocket al cliente que tiene el pedido activo
 - [x] **LOGI-04**: Repartidor puede actualizar el estado de entrega: `picked_up` → `delivered`; cada cambio notifica al cliente y al admin
 
 ### Flash-Control (Admin)
@@ -97,8 +97,8 @@
 | KDS-04 | Phase 2 | Complete |
 | KDS-05 | Phase 2 | Complete |
 | LOGI-01 | Phase 3 | Complete |
-| LOGI-02 | Phase 3 | Pending |
-| LOGI-03 | Phase 3 | Pending |
+| LOGI-02 | Phase 3 | Complete |
+| LOGI-03 | Phase 3 | Complete |
 | LOGI-04 | Phase 3 | Complete |
 | CTRL-01 | Phase 4 | Pending |
 | CTRL-02 | Phase 4 | Pending |
