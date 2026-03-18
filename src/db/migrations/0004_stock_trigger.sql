@@ -47,8 +47,9 @@ BEGIN
   RETURN NEW;
 END;
 $$;
-
+--> statement-breakpoint
 DROP TRIGGER IF EXISTS trg_deduct_stock_on_confirm ON orders;
+--> statement-breakpoint
 CREATE TRIGGER trg_deduct_stock_on_confirm
   AFTER UPDATE ON orders
   FOR EACH ROW
