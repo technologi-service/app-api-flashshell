@@ -36,5 +36,9 @@ export const paymentsPlugin = new Elysia({ name: 'payments', prefix: '/webhooks'
 
     return { received: true }
   }, {
-    response: { 200: WebhookResponse }
+    response: { 200: WebhookResponse },
+    tags: ['payments'],
+    summary: 'Stripe webhook receiver',
+    description: 'Receives `payment_intent.succeeded` events from Stripe. Verifies the `Stripe-Signature` header using HMAC-SHA256 — requests with invalid signatures are rejected with 400. On success: records the payment intent, advances the order to `confirmed`, and fires a `pg_notify` event to WebSocket channels. Idempotent — duplicate Stripe retries are silently acknowledged.',
+    detail: { security: [] }
   })

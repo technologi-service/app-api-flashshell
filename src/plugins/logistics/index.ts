@@ -14,7 +14,10 @@ export const logisticsPlugin = new Elysia({ name: 'logistics', prefix: '/logisti
   .use(requireRole('delivery'))
   .get('/orders/ready', () => getPickupList(), {
     auth: true,
-    response: t.Array(PickupListItemSchema)
+    response: t.Array(PickupListItemSchema),
+    tags: ['logistics'],
+    summary: 'Orders ready for pickup',
+    description: 'Returns all orders in `ready_for_pickup` status that have not yet been claimed by a courier. Couriers use this list to select their next delivery.'
   })
   .get(
     '/orders/:id',
@@ -34,7 +37,10 @@ export const logisticsPlugin = new Elysia({ name: 'logistics', prefix: '/logisti
     {
       auth: true,
       params: t.Object({ id: t.String({ format: 'uuid' }) }),
-      response: { 200: OrderDetailSchema }
+      response: { 200: OrderDetailSchema },
+      tags: ['logistics'],
+      summary: 'Order detail for delivery',
+      description: 'Returns full order detail including delivery address and items. Only the courier assigned to the order can access it — returns 403 for any other delivery user.'
     }
   )
   .patch(
@@ -60,6 +66,9 @@ export const logisticsPlugin = new Elysia({ name: 'logistics', prefix: '/logisti
       auth: true,
       body: AdvanceStatusBody,
       params: t.Object({ id: t.String({ format: 'uuid' }) }),
-      response: { 200: AdvanceStatusResponse }
+      response: { 200: AdvanceStatusResponse },
+      tags: ['logistics'],
+      summary: 'Advance delivery status',
+      description: 'Moves an order through the delivery pipeline: `ready_for_pickup → picked_up → delivered`. Setting `picked_up` claims the order for this courier (returns 409 if already claimed or if courier has another active delivery). Each transition fires a `pg_notify` event to keep the customer and admin WebSocket channels in sync.'
     }
   )

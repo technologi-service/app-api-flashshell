@@ -9,7 +9,10 @@ export const controlPlugin = new Elysia({ name: 'control', prefix: '/control' })
   .use(requireRole('admin'))
   .get('/orders/active', () => getActiveOrders(), {
     auth: true,
-    response: t.Array(ActiveOrder)
+    response: t.Array(ActiveOrder),
+    tags: ['control'],
+    summary: 'Live active orders dashboard',
+    description: 'Returns all orders currently in progress (`confirmed`, `preparing`, `ready_for_pickup`, `picked_up`). Designed for the admin live dashboard — combine with the `control` WebSocket channel for real-time updates without polling.'
   })
   .get(
     '/reports/cashflow',
@@ -17,6 +20,9 @@ export const controlPlugin = new Elysia({ name: 'control', prefix: '/control' })
     {
       auth: true,
       query: CashflowQuery,
-      response: CashflowResponse
+      response: CashflowResponse,
+      tags: ['control'],
+      summary: 'Cashflow report',
+      description: 'Aggregates completed order totals for a given date range. Query params `from` and `to` are ISO 8601 date strings (e.g. `2024-01-01`). Only `delivered` orders are included in the totals.'
     }
   )

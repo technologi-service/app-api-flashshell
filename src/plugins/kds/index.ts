@@ -19,7 +19,10 @@ export const kdsPlugin = new Elysia({ name: 'kds', prefix: '/kds' })
   .use(requireRole('chef'))
   .get('/orders', () => getActiveOrders(), {
     auth: true,
-    response: t.Array(KdsActiveOrderSchema)
+    response: t.Array(KdsActiveOrderSchema),
+    tags: ['kds'],
+    summary: 'Active orders queue',
+    description: 'Returns all orders in `confirmed` or `preparing` status, with their individual items and current item statuses. This is the main feed for the Kitchen Display System.'
   })
   .patch(
     '/orders/:id/items/:itemId',
@@ -40,7 +43,10 @@ export const kdsPlugin = new Elysia({ name: 'kds', prefix: '/kds' })
         id: t.String({ format: 'uuid' }),
         itemId: t.String({ format: 'uuid' })
       }),
-      response: { 200: UpdateItemStatusResponse }
+      response: { 200: UpdateItemStatusResponse },
+      tags: ['kds'],
+      summary: 'Update item preparation status',
+      description: 'Sets the preparation status of a single order item (`pending → preparing → ready`). When all items in an order reach `ready`, the order status automatically advances to `ready_for_pickup` and notifies the `logistics` WebSocket channel.'
     }
   )
   .patch(
@@ -59,6 +65,9 @@ export const kdsPlugin = new Elysia({ name: 'kds', prefix: '/kds' })
       auth: true,
       body: ToggleAvailabilityBody,
       params: t.Object({ itemId: t.String({ format: 'uuid' }) }),
-      response: { 200: ToggleAvailabilityResponse }
+      response: { 200: ToggleAvailabilityResponse },
+      tags: ['kds'],
+      summary: 'Toggle menu item availability',
+      description: 'Enables or disables a menu item. Unavailable items are hidden from `GET /consumer/menu` and cannot be added to new orders.'
     }
   )
