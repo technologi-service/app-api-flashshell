@@ -25,5 +25,9 @@ export const healthPlugin = new Elysia({ name: 'health', prefix: '/health' })
       uptime: process.uptime()
     }
   }, {
-    response: HealthResponse
+    response: HealthResponse,
+    tags: ['health'],
+    summary: 'Health check',
+    description: 'Returns the server and database status. Probes Neon with `SELECT 1` (3 s timeout) — returns `degraded` if the probe fails. Safe to call without authentication; suitable for load-balancer liveness checks.',
+    detail: { security: [] }
   })

@@ -329,9 +329,13 @@ The only supported client message is \`"ping"\` — the server replies \`"pong"\
   .use(couriersPlugin)
   .use(controlPlugin)
   .use(paymentsPlugin)   // POST /webhooks/stripe — no auth (Stripe calls directly)
-  .listen(3001)
-
-console.log(`FlashShell Engine running at ${app.server?.hostname}:${app.server?.port}`)
+  .listen(3001, ({ hostname, port }) => {
+    const baseUrl = `http://${hostname}:${port}`
+    console.log(`✓ FlashShell Engine running at ${baseUrl}`)
+    if (isDev) {
+      console.log(`📖 Documentación: ${baseUrl}/openapi`)
+    }
+  })
 
 /**
  * Eden Treaty type export.

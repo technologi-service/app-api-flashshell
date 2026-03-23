@@ -22,6 +22,9 @@ export const couriersPlugin = new Elysia({ name: 'couriers', prefix: '/couriers'
     {
       auth: true,
       body: UpdateLocationBody,
-      response: { 200: UpdateLocationResponse }
+      response: { 200: UpdateLocationResponse },
+      tags: ['couriers'],
+      summary: 'Update courier GPS location',
+      description: 'Records the courier\'s current GPS coordinates. Only works while the courier has an active delivery in `picked_up` status — returns 403 otherwise. The frontend should call this endpoint at a regular interval (e.g. every 5 seconds) while a delivery is in progress.'
     }
   )

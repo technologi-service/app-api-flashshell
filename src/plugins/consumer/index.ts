@@ -17,7 +17,10 @@ export const consumerPlugin = new Elysia({ name: 'consumer', prefix: '/consumer'
   .use(requireRole('customer'))
   .get('/menu', () => getActiveMenu(), {
     auth: true,
-    response: t.Array(MenuItemSchema)
+    response: t.Array(MenuItemSchema),
+    tags: ['consumer'],
+    summary: 'Get active menu',
+    description: 'Returns all menu items currently marked as available. Only items with `isAvailable: true` are included.'
   })
   .post(
     '/orders',
@@ -35,7 +38,10 @@ export const consumerPlugin = new Elysia({ name: 'consumer', prefix: '/consumer'
     {
       auth: true,
       body: CreateOrderBody,
-      response: { 200: CreatedOrderSchema }
+      response: { 200: CreatedOrderSchema },
+      tags: ['consumer'],
+      summary: 'Place an order',
+      description: 'Creates a new order in `pending` status. Returns 409 if any requested item is unavailable. After placing the order, call `POST /consumer/orders/:id/pay` to obtain the Stripe `clientSecret` and confirm payment on the frontend.'
     }
   )
   .get(
@@ -43,7 +49,10 @@ export const consumerPlugin = new Elysia({ name: 'consumer', prefix: '/consumer'
     async ({ user }) => getOrderHistory(user.id),
     {
       auth: true,
-      response: t.Array(OrderHistoryItemSchema)
+      response: t.Array(OrderHistoryItemSchema),
+      tags: ['consumer'],
+      summary: 'Order history',
+      description: 'Returns all orders placed by the authenticated customer, sorted by creation date descending.'
     }
   )
   .post(
@@ -60,6 +69,9 @@ export const consumerPlugin = new Elysia({ name: 'consumer', prefix: '/consumer'
     {
       auth: true,
       params: t.Object({ id: t.String({ format: 'uuid' }) }),
-      response: { 200: PayIntentSchema }
+      response: { 200: PayIntentSchema },
+      tags: ['consumer'],
+      summary: 'Create payment intent',
+      description: 'Generates a Stripe `clientSecret` for the given order. Pass this secret to `stripe.confirmCardPayment()` on the frontend. The order must be in `pending` status — returns 409 otherwise. Once Stripe confirms the payment, the order advances to `confirmed` automatically via webhook.'
     }
   )
