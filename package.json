@@ -6,7 +6,8 @@
     "dev": "bun run --watch src/index.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "bun run src/db/migrate.ts",
-    "db:seed:admin": "bun run scripts/seed-admin.ts"
+    "db:seed:admin": "bun run scripts/seed-admin.ts",
+    "db:seed:roles": "bun run scripts/seed-roles.ts"
   },
   "dependencies": {
     "@elysiajs/cors": "^1.4.1",

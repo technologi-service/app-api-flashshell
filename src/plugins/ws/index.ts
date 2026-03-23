@@ -13,21 +13,34 @@ import { startListener, registerSocket, unregisterSocket } from './listener'
 
 export const wsPlugin = new Elysia({ name: 'ws-hub', prefix: '/ws' })
   .ws('/:channel', {
-    async beforeHandle({ headers, status }) {
-      // Verify Bearer token before the WebSocket upgrade handshake.
-      // Returning a status response here aborts the upgrade with HTTP 401.
-      const session = await auth.api.getSession({ headers })
+    async beforeHandle({ request, status }) {
+      // Use request.headers (native Headers object) — Elysia's context `headers`
+      // is a plain object that Better Auth's getSession() does not accept.
+      //
+      // Browsers cannot send custom headers in native WebSocket connections.
+      // Fallback: accept the session token via ?token= query param.
+      // Security trade-off: tokens in URLs appear in server logs and browser history.
+      // Prefer cookie-based auth (sign-in with credentials:'include') when possible.
+      let authHeaders = request.headers
+
+      if (!request.headers.get('authorization')) {
+        const tokenFromQuery = new URL(request.url).searchParams.get('token')
+        if (tokenFromQuery) {
+          authHeaders = new Headers(request.headers)
+          authHeaders.set('authorization', `Bearer ${tokenFromQuery}`)
+        }
+      }
+
+      const session = await auth.api.getSession({ headers: authHeaders })
       if (!session) return status(401, {
         error: 'UNAUTHORIZED',
         message: 'Valid authentication token required to open WebSocket connection'
       })
-      // NOTE: Open question from 01-RESEARCH.md — verify in test that returning
-      // status(401) from beforeHandle on a WS route actually produces HTTP 401
-      // and not a WS handshake. See open question 2.
     },
     open(ws) {
       const channel = ws.data.params.channel
       registerSocket(channel, ws)
+      ws.send(JSON.stringify({ event: 'connected', channel, message: `Subscribed to ${channel}` }))
       console.log(`[ws-hub] Client joined channel: ${channel}`)
     },
     close(ws) {

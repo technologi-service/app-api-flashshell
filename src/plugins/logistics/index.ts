@@ -1,13 +1,21 @@
-import { Elysia } from 'elysia'
+import { Elysia, t } from 'elysia'
 import { authPlugin } from '../auth/index'
 import { requireRole } from '../auth/require-role'
-import { AdvanceStatusBody } from './model'
+import {
+  AdvanceStatusBody,
+  PickupListItemSchema,
+  OrderDetailSchema,
+  AdvanceStatusResponse
+} from './model'
 import { getPickupList, getOrderDetail, advanceOrderStatus } from './service'
 
 export const logisticsPlugin = new Elysia({ name: 'logistics', prefix: '/logistics' })
   .use(authPlugin)
   .use(requireRole('delivery'))
-  .get('/orders/ready', () => getPickupList(), { auth: true })
+  .get('/orders/ready', () => getPickupList(), {
+    auth: true,
+    response: t.Array(PickupListItemSchema)
+  })
   .get(
     '/orders/:id',
     async ({ params, user, status }) => {
@@ -23,7 +31,11 @@ export const logisticsPlugin = new Elysia({ name: 'logistics', prefix: '/logisti
       }
       return result.order
     },
-    { auth: true }
+    {
+      auth: true,
+      params: t.Object({ id: t.String({ format: 'uuid' }) }),
+      response: { 200: OrderDetailSchema }
+    }
   )
   .patch(
     '/orders/:id/status',
@@ -44,5 +56,10 @@ export const logisticsPlugin = new Elysia({ name: 'logistics', prefix: '/logisti
       }
       return { success: true, status: body.status }
     },
-    { auth: true, body: AdvanceStatusBody }
+    {
+      auth: true,
+      body: AdvanceStatusBody,
+      params: t.Object({ id: t.String({ format: 'uuid' }) }),
+      response: { 200: AdvanceStatusResponse }
+    }
   )

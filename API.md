@@ -1,398 +1,582 @@
-# FlashShell Engine — API Reference
+# FlashShell Engine — Guia de integracion Frontend
 
-> Interactive docs (dev only): `http://localhost:3000/openapi`
+Base URL: `http://localhost:3001`
+OpenAPI UI: `http://localhost:3001/openapi`
 
----
+## Autenticacion
 
-## Setup
+Todos los endpoints protegidos requieren el header `Authorization: Bearer <token>`.
 
-### Variables de entorno en el frontend
+### Sign Up (registro)
 
-```env
-VITE_API_URL=http://localhost:3000
-VITE_STRIPE_PUBLISHABLE_KEY=pk_test_...
 ```
+POST /api/auth/sign-up/email
+Content-Type: application/json
 
-### Todas las peticiones deben incluir credenciales
-
-```js
-// fetch nativo
-fetch(`${import.meta.env.VITE_API_URL}/consumer/orders`, {
-  credentials: 'include',   // OBLIGATORIO — envía la cookie de sesión
-  headers: { 'Content-Type': 'application/json' }
-})
-```
-
-```js
-// axios
-axios.defaults.baseURL = import.meta.env.VITE_API_URL
-axios.defaults.withCredentials = true  // OBLIGATORIO
-```
-
-Sin `credentials: 'include'` / `withCredentials: true` la sesión no se envía y todas las rutas protegidas devuelven 401.
-
----
-
-## Autenticación
-
-### `POST /api/auth/sign-up/email`
-
-```json
-{ "email": "user@example.com", "password": "password123", "name": "Jane Doe" }
-```
-
-**200:**
-```json
 {
-  "token": "<session-token>",
-  "user": { "id": "uuid", "email": "user@example.com", "name": "Jane Doe", "role": "customer" }
+  "email": "usuario@ejemplo.com",
+  "password": "minimo8chars",
+  "name": "Nombre del usuario"
 }
 ```
 
-La cookie de sesión se setea automáticamente. Guarda el `user.role` para mostrar las vistas correctas.
-
----
-
-### `POST /api/auth/sign-in/email`
-
-```json
-{ "email": "user@example.com", "password": "password123" }
-```
-
-**200:** misma forma que sign-up. **401:** credenciales inválidas.
-
----
-
-### `POST /api/auth/sign-out`
-
-Sin body. Invalida la sesión y borra la cookie.
-
----
-
-### `GET /api/auth/get-session`
-
-Devuelve la sesión actual. Úsalo al cargar la app para saber si el usuario ya está logueado.
-
-**200:**
+Response `200`:
 ```json
 {
-  "session": { "id": "uuid", "expiresAt": "2026-04-18T00:00:00Z" },
-  "user": { "id": "uuid", "email": "...", "name": "...", "role": "customer" }
-}
-```
-
-**401:** no hay sesión activa.
-
----
-
-## Roles y acceso
-
-| Rol | Rutas |
-|-----|-------|
-| `customer` | `/consumer/*` |
-| `chef` | `/kds/*` |
-| `delivery` | `/logistics/*`, `/couriers/*` |
-| `admin` | `/control/*` |
-
-Los roles se asignan en el servidor. El signup siempre crea `customer`. Para crear cuentas `chef`, `delivery` o `admin` usa el script de seed o hazlo directamente en la DB.
-
----
-
-## Endpoints
-
-### `GET /health`
-Sin auth. Verifica que el servidor y la DB estén operativos.
-
-**200:** `{ "status": "ok", "db": "ok", "uptime": 123.4 }`
-
----
-
-### Consumer (rol: `customer`)
-
-#### `GET /consumer/menu`
-Lista de items disponibles.
-
-**200:**
-```json
-[
-  { "id": "uuid", "name": "Tacos de Birria", "description": "...", "price": "12.50", "isAvailable": true }
-]
-```
-
----
-
-#### `POST /consumer/orders`
-Crea una orden. Queda en estado `pending` hasta que se complete el pago.
-
-```json
-{
-  "items": [
-    { "menuItemId": "uuid", "quantity": 2 }
-  ],
-  "deliveryAddress": "Calle Falsa 123"
-}
-```
-
-**200:**
-```json
-{
-  "id": "uuid",
-  "status": "pending",
-  "totalAmount": "25.00",
-  "items": [
-    { "itemId": "uuid", "name": "Tacos de Birria", "quantity": 2, "unitPrice": "12.50" }
-  ]
-}
-```
-
-**409:** uno o más items sin stock — `{ "error": "CONFLICT", "details": ["<menuItemId>"] }`
-
----
-
-#### `POST /consumer/orders/:id/pay`
-Inicia el pago de una orden. Devuelve el `clientSecret` de Stripe para que el frontend complete el checkout.
-
-**200:**
-```json
-{ "clientSecret": "pi_xxx_secret_xxx" }
-```
-
-**Con Stripe.js:**
-```js
-import { loadStripe } from '@stripe/stripe-js'
-
-const stripe = await loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY)
-
-const { error } = await stripe.confirmCardPayment(clientSecret, {
-  payment_method: {
-    card: cardElement,  // elemento de Stripe
-    billing_details: { name: 'Jane Doe' }
+  "token": "abc123...",
+  "user": {
+    "id": "string",
+    "email": "usuario@ejemplo.com",
+    "name": "Nombre del usuario",
+    "role": "customer"
   }
-})
-
-if (!error) {
-  // pago completado — escuchar el WebSocket para la confirmación del servidor
 }
 ```
 
-Cuando Stripe confirma el pago, el servidor cambia la orden de `pending` a `confirmed` automáticamente vía webhook.
+El `role` siempre es `customer` al registrarse. No se puede elegir rol.
 
----
+### Sign In (login)
 
-#### `GET /consumer/orders`
-Historial de órdenes del usuario autenticado.
+```
+POST /api/auth/sign-in/email
+Content-Type: application/json
 
-**200:**
-```json
-[
-  { "id": "uuid", "status": "confirmed", "totalAmount": "25.00", "createdAt": "2026-03-18T10:00:00Z" }
-]
+{
+  "email": "usuario@ejemplo.com",
+  "password": "minimo8chars"
+}
 ```
 
-**Estados posibles:** `pending` → `confirmed` → `preparing` → `ready` → `delivered`
+Response `200`:
+```json
+{
+  "token": "abc123...",
+  "user": {
+    "id": "string",
+    "email": "usuario@ejemplo.com",
+    "name": "Nombre del usuario",
+    "role": "customer | chef | delivery | admin"
+  }
+}
+```
+
+**Guardar el `token`** — se usa en todas las peticiones posteriores.
+**Guardar el `user.role`** — determina a que pantallas redirigir.
+
+Error `401`: `{"message": "Invalid email or password", "code": "INVALID_EMAIL_OR_PASSWORD"}`
+
+### Obtener sesion actual
+
+```
+GET /api/auth/get-session
+Authorization: Bearer <token>
+```
+
+Response `200`:
+```json
+{
+  "session": { "id": "string", "expiresAt": "2026-03-26T..." },
+  "user": { "id": "string", "email": "string", "name": "string", "role": "string" }
+}
+```
+
+Response si no hay sesion: `null`
+
+Usar este endpoint al cargar la app para verificar si el token guardado sigue siendo valido.
+
+### Sign Out (logout)
+
+```
+POST /api/auth/sign-out
+Authorization: Bearer <token>
+```
+
+Response `200`: `{ "success": true }`
+
+Despues de sign-out, el token queda invalidado en el servidor. Borrar el token del almacenamiento local.
 
 ---
 
-### KDS — Cocina (rol: `chef`)
+## Routing por rol
 
-#### `GET /kds/orders`
-Todas las órdenes activas con sus items.
+Despues del sign-in, redirigir segun `user.role`:
 
-**200:**
+| Rol | Redirigir a | Descripcion |
+|-----|------------|-------------|
+| `customer` | Pantalla de menu/pedidos | Puede ver menu, crear pedidos, pagar, ver historial |
+| `chef` | Pantalla KDS (cocina) | Ve ordenes confirmadas, cambia estado de items |
+| `delivery` | Pantalla logistics | Ve ordenes listas, recoge y entrega |
+| `admin` | Pantalla control/dashboard | Ve todas las ordenes activas, reportes |
+
+Si un rol intenta acceder a una ruta que no le corresponde, el servidor responde:
+```json
+// HTTP 403
+{
+  "error": "FORBIDDEN",
+  "message": "Requires role: chef",
+  "required": ["chef"]
+}
+```
+
+---
+
+## Flujo del pedido (ciclo de vida de una orden)
+
+```
+customer crea orden          → status: "pending"
+customer paga (Stripe)       → status: "confirmed"      → chef recibe notificacion
+chef marca items preparing   → status: "preparing"
+chef marca todos items ready → status: "ready_for_pickup" → delivery recibe notificacion
+delivery recoge              → status: "picked_up"        → customer ve actualizacion
+delivery entrega             → status: "delivered"         → customer ve actualizacion
+```
+
+---
+
+## Pantalla Customer
+
+### Ver menu
+
+```
+GET /consumer/menu
+Authorization: Bearer <token>
+```
+
+Response `200`:
 ```json
 [
   {
     "id": "uuid",
+    "name": "Hamburguesa Clasica",
+    "description": "Carne 200g con lechuga y tomate",
+    "price": "8.50",
+    "isAvailable": true
+  }
+]
+```
+
+Solo devuelve items con `isAvailable: true`.
+
+### Crear pedido
+
+```
+POST /consumer/orders
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "items": [
+    { "menuItemId": "uuid-del-item", "quantity": 2 },
+    { "menuItemId": "uuid-otro-item", "quantity": 1 }
+  ],
+  "deliveryAddress": "Calle Falsa 123, Piso 4"
+}
+```
+
+Response `200`:
+```json
+{
+  "id": "uuid-de-la-orden",
+  "status": "pending",
+  "totalAmount": "25.50",
+  "deliveryAddress": "Calle Falsa 123, Piso 4",
+  "items": [
+    { "itemId": "uuid", "name": "Hamburguesa Clasica", "quantity": 2, "unitPrice": "8.50" },
+    { "itemId": "uuid", "name": "Papas Fritas", "quantity": 1, "unitPrice": "8.50" }
+  ]
+}
+```
+
+Error `409` (sin stock o item no disponible):
+```json
+{
+  "error": "CONFLICT",
+  "message": "One or more items are unavailable or out of stock",
+  "details": ["uuid-del-item-sin-stock"]
+}
+```
+
+### Pagar pedido (Stripe)
+
+```
+POST /consumer/orders/:orderId/pay
+Authorization: Bearer <token>
+```
+
+Response `200`:
+```json
+{ "clientSecret": "pi_xxx_secret_yyy" }
+```
+
+Usar el `clientSecret` con Stripe.js para confirmar el pago en el frontend:
+```js
+const stripe = Stripe('pk_test_...')
+const { error } = await stripe.confirmPayment({
+  clientSecret: response.clientSecret,
+  confirmParams: { return_url: 'https://tuapp.com/order-confirmed' }
+})
+```
+
+Cuando Stripe confirma el pago, el backend recibe un webhook y cambia la orden a `confirmed` automaticamente.
+
+Errores:
+- `404`: Orden no encontrada
+- `409`: Orden ya no esta en estado `pending`
+
+### Historial de pedidos
+
+```
+GET /consumer/orders
+Authorization: Bearer <token>
+```
+
+Response `200`:
+```json
+[
+  { "id": "uuid", "status": "delivered", "totalAmount": "25.50", "createdAt": "2026-03-19T..." },
+  { "id": "uuid", "status": "pending", "totalAmount": "10.00", "createdAt": "2026-03-19T..." }
+]
+```
+
+Ordenados por fecha descendente (mas reciente primero).
+
+---
+
+## Pantalla Chef (KDS)
+
+### Ver ordenes activas
+
+```
+GET /kds/orders
+Authorization: Bearer <token>
+```
+
+Response `200`:
+```json
+[
+  {
+    "id": "uuid-de-la-orden",
+    "customerId": "string",
     "status": "confirmed",
-    "createdAt": "2026-03-18T10:00:00Z",
+    "totalAmount": "25.50",
+    "deliveryAddress": "Calle Falsa 123",
+    "createdAt": "2026-03-19T...",
     "items": [
-      { "id": "uuid", "name": "Tacos de Birria", "quantity": 2, "itemStatus": "pending" }
+      {
+        "id": "uuid-del-item",
+        "menuItemId": "uuid",
+        "quantity": 2,
+        "unitPrice": "8.50",
+        "itemStatus": "pending",
+        "name": "Hamburguesa Clasica"
+      }
     ]
   }
 ]
 ```
 
----
+Solo muestra ordenes con status `confirmed` o `preparing`.
 
-#### `PATCH /kds/orders/:orderId/items/:itemId`
-Avanza el estado de un item.
+Cada item tiene su propio `itemStatus`: `pending` → `preparing` → `ready`.
 
-```json
-{ "status": "preparing" }
+### Actualizar estado de un item
+
+```
+PATCH /kds/orders/:orderId/items/:itemId
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{ "status": "preparing" }   // o "ready"
 ```
 
-`status`: `"preparing"` | `"ready"`
-
-**200:** `{ "success": true, "advanced": true }`
-`advanced: true` significa que todos los items llegaron a `ready` y la orden pasó a `ready` automáticamente.
-
----
-
-#### `PATCH /kds/menu/:itemId/availability`
-Activa o desactiva un item del menú.
-
+Response `200`:
 ```json
+{ "success": true, "advanced": false }
+```
+
+`advanced: true` significa que TODOS los items de la orden estan `ready` y la orden paso automaticamente a `ready_for_pickup`. Cuando esto pasa, mostrar feedback visual al chef (ej: "Orden lista para despacho").
+
+### Cambiar disponibilidad de un item del menu
+
+```
+PATCH /kds/menu/:menuItemId/availability
+Authorization: Bearer <token>
+Content-Type: application/json
+
 { "isAvailable": false }
 ```
 
-**200:** `{ "success": true, "isAvailable": false }`
+Response `200`: `{ "success": true, "isAvailable": false }`
 
 ---
 
-### Logistics — Repartidores (rol: `delivery`)
+## Pantalla Delivery
 
-#### `GET /logistics/pickup`
-Lista de órdenes listas para recoger (`ready` y sin courier asignado).
+### Ver ordenes listas para recoger
 
-**200:**
-```json
-[
-  { "id": "uuid", "status": "ready", "deliveryAddress": "Calle Falsa 123", "items": [...] }
-]
+```
+GET /logistics/orders/ready
+Authorization: Bearer <token>
 ```
 
----
-
-#### `GET /logistics/orders/:id`
-Detalle de una orden específica.
-
----
-
-#### `PATCH /logistics/orders/:id/picked_up`
-Marca la orden como recogida. Asigna el courier autenticado.
-
-**200:** `{ "success": true }` **409:** ya tiene courier asignado.
-
----
-
-#### `PATCH /logistics/orders/:id/delivered`
-Marca la orden como entregada.
-
-**200:** `{ "success": true }` **409:** no está en estado `picked_up`.
-
----
-
-### Couriers — GPS (rol: `delivery`)
-
-#### `POST /couriers/location`
-Actualiza la posición del repartidor. Throttle de 30 segundos.
-
-```json
-{ "latitude": 19.4326, "longitude": -99.1332 }
-```
-
-**200:** `{ "updated": true }` **429:** throttle activo, espera 30s.
-
----
-
-### Control — Admin (rol: `admin`)
-
-#### `GET /control/orders/active`
-Todas las órdenes que no están en `delivered` ni `cancelled`.
-
-**200:**
+Response `200`:
 ```json
 [
   {
     "id": "uuid",
-    "status": "preparing",
-    "totalAmount": "25.00",
-    "createdAt": "2026-03-18T10:00:00Z",
-    "items": [...]
+    "status": "ready_for_pickup",
+    "totalAmount": "25.50",
+    "deliveryAddress": "Calle Falsa 123",
+    "createdAt": "2026-03-19T...",
+    "items": [
+      { "name": "Hamburguesa Clasica", "quantity": 2 }
+    ]
   }
 ]
 ```
 
----
+Muestra ordenes en `preparing` o `ready_for_pickup` sin courier asignado.
 
-#### `GET /control/reports/cashflow?from=YYYY-MM-DD&to=YYYY-MM-DD`
-Reporte financiero del período.
+### Ver detalle de una orden
 
-**200:**
+```
+GET /logistics/orders/:orderId
+Authorization: Bearer <token>
+```
+
+Response `200`:
 ```json
 {
-  "from": "2026-03-01",
-  "to": "2026-03-18",
-  "totalRevenue": "1250.00",
-  "totalStockCost": "430.00",
-  "margin": "820.00"
+  "id": "uuid",
+  "status": "ready_for_pickup",
+  "totalAmount": "25.50",
+  "deliveryAddress": "Calle Falsa 123",
+  "courierId": null,
+  "createdAt": "2026-03-19T...",
+  "items": [ { "name": "Hamburguesa Clasica", "quantity": 2 } ]
 }
 ```
 
+### Recoger orden (picked_up)
+
+```
+PATCH /logistics/orders/:orderId/status
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{ "status": "picked_up" }
+```
+
+Response `200`: `{ "success": true, "status": "picked_up" }`
+
+Errores:
+- `409 ALREADY_CLAIMED`: Otro courier ya tomo esta orden
+- `409 COURIER_BUSY`: Ya tienes una entrega activa
+- `409 INVALID_TRANSITION`: La orden no esta en `ready_for_pickup`
+
+**Restriccion**: Un courier solo puede tener una entrega activa a la vez.
+
+### Entregar orden (delivered)
+
+```
+PATCH /logistics/orders/:orderId/status
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{ "status": "delivered" }
+```
+
+Response `200`: `{ "success": true, "status": "delivered" }`
+
+Solo el courier que recogio la orden puede marcarla como entregada.
+
+### Enviar ubicacion GPS
+
+```
+POST /couriers/location
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{ "lat": -34.603722, "lng": -58.381592 }
+```
+
+Enviar periodicamente (cada 10-15 segundos) mientras el courier tenga una entrega activa.
+
 ---
 
-## WebSocket — Tiempo real
+## Pantalla Admin
 
+### Ver ordenes activas
+
+```
+GET /control/orders/active
+Authorization: Bearer <token>
+```
+
+Response `200`: Array de ordenes con status `confirmed` o `preparing`, incluyendo items.
+
+### Reporte de cashflow
+
+```
+GET /control/reports/cashflow?from=2026-03-01&to=2026-03-19
+Authorization: Bearer <token>
+```
+
+Parametros `from` y `to` requeridos (formato `YYYY-MM-DD`).
+
+---
+
+## WebSocket — Eventos en tiempo real
+
+Conexion:
 ```js
-const ws = new WebSocket(`ws://localhost:3000/ws/${channel}`, [], {
-  // la cookie de sesión se envía automáticamente por el browser
+const token = 'tu-bearer-token'
+const ws = new WebSocket(`ws://localhost:3001/ws/${channel}`, {
+  headers: { Authorization: `Bearer ${token}` }
+})
+```
+
+**Desde browsers** el constructor `WebSocket` no soporta headers custom. Dos estrategias soportadas:
+
+**Opcion 1 — Cookie (preferida, sin riesgo):**
+Hacer el sign-in con `credentials: 'include'`. El browser envia la cookie automaticamente en la conexion WS.
+```js
+// Login con credentials: 'include'
+await fetch('http://localhost:3001/api/auth/sign-in/email', {
+  method: 'POST',
+  credentials: 'include',  // el servidor setea Set-Cookie
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ email, password })
 })
 
-ws.onmessage = (e) => {
-  const event = JSON.parse(e.data)
-  console.log(event.event, event)
-}
+// WS conecta sin token — la cookie viaja sola
+const ws = new WebSocket('ws://localhost:3001/ws/kds')
 ```
 
-### Canales
-
-| Canal | Quién escucha | Eventos |
-|-------|--------------|---------|
-| `kds` | Chef | `new_order`, `item_status_updated` |
-| `order:<orderId>` | Customer | `order_confirmed`, `order_status_updated` |
-| `logistics` | Courier | `order_ready_for_pickup` |
-| `control` | Admin | `order_confirmed`, `low_stock_alert` |
-
-### Ejemplo — escuchar confirmación de pago (customer)
-
+**Opcion 2 — Query param `?token=` (fallback):**
+Enviar el Bearer token como query param. Funciona pero el token queda en logs del servidor y en el historial del browser.
 ```js
-// Después de llamar a stripe.confirmCardPayment()
-const ws = new WebSocket(`ws://localhost:3000/ws/order:${orderId}`)
+const ws = new WebSocket(`ws://localhost:3001/ws/kds?token=${bearerToken}`)
+```
 
-ws.onmessage = (e) => {
-  const { event } = JSON.parse(e.data)
-  if (event === 'order_confirmed') {
-    // mostrar confirmación al usuario
-    ws.close()
-  }
+> **Advertencia de seguridad**: el token en la URL es visible en logs de servidor, proxies y historial del browser. Usar solo si no es posible la autenticacion por cookie.
+
+### Evento de conexion exitosa
+
+Al conectarse, el servidor envia inmediatamente:
+```json
+{ "event": "connected", "channel": "kds", "message": "Subscribed to kds" }
+```
+
+### Keep-alive
+
+Enviar `"ping"` periodicamente. El servidor responde `"pong"`.
+
+### Canales por rol
+
+| Canal | Rol | Cuando suscribirse |
+|-------|-----|-------------------|
+| `order:{orderId}` | customer | Despues de crear un pedido, para seguir su estado |
+| `kds` | chef | Al entrar a la pantalla KDS, para recibir ordenes nuevas |
+| `logistics` | delivery | Al entrar a la pantalla de delivery, para ordenes listas |
+| `control` | admin | Al entrar al dashboard, para ver todo en tiempo real |
+
+### Eventos que recibe cada canal
+
+**Canal `order:{orderId}`** (customer):
+```json
+{ "channel": "order:uuid", "event": "order_confirmed", "orderId": "uuid", "status": "confirmed" }
+{ "channel": "order:uuid", "event": "item_status_changed", "orderId": "uuid", "itemId": "uuid", "status": "preparing" }
+{ "channel": "order:uuid", "event": "order_status_changed", "orderId": "uuid", "status": "ready_for_pickup" }
+{ "channel": "order:uuid", "event": "order_picked_up", "orderId": "uuid", "courierId": "string" }
+{ "channel": "order:uuid", "event": "order_delivered", "orderId": "uuid" }
+```
+
+**Canal `kds`** (chef):
+```json
+{ "channel": "kds", "event": "new_order", "orderId": "uuid" }
+{ "channel": "kds", "event": "order_ready", "orderId": "uuid" }
+```
+
+Al recibir `new_order`, hacer `GET /kds/orders` para refrescar la lista.
+
+**Canal `logistics`** (delivery):
+```json
+{ "channel": "logistics", "event": "order_ready_for_pickup", "orderId": "uuid" }
+```
+
+Al recibir `order_ready_for_pickup`, hacer `GET /logistics/orders/ready` para refrescar.
+
+**Canal `control`** (admin):
+```json
+{ "channel": "control", "event": "order_picked_up", "orderId": "uuid", "courierId": "string" }
+{ "channel": "control", "event": "order_delivered", "orderId": "uuid" }
+```
+
+---
+
+## Manejo de errores
+
+Todos los errores siguen este formato:
+```json
+{
+  "error": "ERROR_CODE",
+  "message": "Descripcion legible"
 }
 ```
 
----
-
-## Flujo de pago completo
-
-```
-1. POST /consumer/orders          → { id, status: "pending" }
-2. POST /consumer/orders/:id/pay  → { clientSecret }
-3. stripe.confirmCardPayment(clientSecret, { card })
-4. Stripe → POST /webhooks/stripe (automático, no llamar desde frontend)
-5. WS order:<id> recibe { event: "order_confirmed" }
-6. Mostrar confirmación al usuario
-```
-
----
-
-## Errores
-
-```json
-{ "error": "ERROR_CODE", "message": "descripción" }
-```
-
-| HTTP | Código | Cuándo |
-|------|--------|--------|
-| 401 | `UNAUTHORIZED` | Sin sesión o sesión expirada |
-| 403 | `FORBIDDEN` | Rol incorrecto para esa ruta |
+| HTTP | Codigo | Significado |
+|------|--------|-------------|
+| 401 | `UNAUTHORIZED` | Token ausente, invalido o sesion expirada → redirigir a login |
+| 403 | `FORBIDDEN` | Rol incorrecto → no mostrar esa seccion |
 | 404 | `NOT_FOUND` | Recurso no existe |
-| 409 | `CONFLICT` | Stock insuficiente / estado inválido |
-| 422 | `VALIDATION_ERROR` | Body inválido — incluye `details[]` |
-| 500 | `INTERNAL_ERROR` | Error del servidor |
+| 409 | `CONFLICT` | Estado invalido (sin stock, orden ya tomada, etc) |
+| 422 | `VALIDATION_ERROR` | Body mal formado (tiene campo `details` con array de errores) |
 
 ---
 
-## Notas
+## Cuentas de prueba
 
-- `price`, `totalAmount`, `unitPrice` son **strings** (ej. `"12.50"`), no números. Usa `parseFloat()` si necesitas operar con ellos.
-- `createdAt` y fechas son **ISO 8601 UTC**.
-- Todos los IDs son **UUID v4**.
-- El endpoint `/webhooks/stripe` es solo para Stripe — no llamarlo desde el frontend.
+Ejecutar `bun run db:seed:roles` en el backend para crear estos usuarios:
+
+| Rol | Email | Password |
+|-----|-------|----------|
+| customer | (registrar via sign-up) | (el que elijas) |
+| chef | chef@flashshell.test | test-chef-pass |
+| delivery | delivery@flashshell.test | test-delivery-pass |
+| admin | admin@flashshell.test | test-admin-pass |
+
+---
+
+## Flujo completo para validar pantallas
+
+### 1. Customer: crear y pagar pedido
+1. `POST /api/auth/sign-up/email` → registrar usuario
+2. `GET /consumer/menu` → mostrar menu
+3. `POST /consumer/orders` → crear pedido con items del menu
+4. `POST /consumer/orders/:id/pay` → obtener `clientSecret`
+5. Confirmar pago con Stripe.js
+6. Conectar WebSocket a `ws://localhost:3001/ws/order:{orderId}`
+7. Esperar evento `order_confirmed`
+
+### 2. Chef: preparar pedido
+1. `POST /api/auth/sign-in/email` → login como chef
+2. Conectar WebSocket a `ws://localhost:3001/ws/kds`
+3. `GET /kds/orders` → ver ordenes activas
+4. `PATCH /kds/orders/:id/items/:itemId` → `{"status": "preparing"}`
+5. `PATCH /kds/orders/:id/items/:itemId` → `{"status": "ready"}`
+6. Si `advanced: true` → orden lista para despacho
+
+### 3. Delivery: recoger y entregar
+1. `POST /api/auth/sign-in/email` → login como delivery
+2. Conectar WebSocket a `ws://localhost:3001/ws/logistics`
+3. `GET /logistics/orders/ready` → ver ordenes listas
+4. `PATCH /logistics/orders/:id/status` → `{"status": "picked_up"}`
+5. `POST /couriers/location` → enviar GPS periodicamente
+6. `PATCH /logistics/orders/:id/status` → `{"status": "delivered"}`
+
+### 4. Admin: monitorear
+1. `POST /api/auth/sign-in/email` → login como admin
+2. Conectar WebSocket a `ws://localhost:3001/ws/control`
+3. `GET /control/orders/active` → ver dashboard
+4. `GET /control/reports/cashflow?from=2026-03-01&to=2026-03-31` → ver reporte

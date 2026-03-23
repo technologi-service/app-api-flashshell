@@ -6,7 +6,7 @@ import { orders } from '../../db/schema/orders'
 import { eq, and } from 'drizzle-orm'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-12-18'
+  apiVersion: '2026-02-25.clover'
 })
 
 // pg.Pool for transactional webhook processing — uses DATABASE_DIRECT_URL to bypass

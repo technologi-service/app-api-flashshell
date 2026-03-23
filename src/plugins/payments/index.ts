@@ -4,10 +4,12 @@
 // Stripe calls this endpoint directly (no auth).
 import { Elysia } from 'elysia'
 import { stripe, handlePaymentSucceeded } from './service'
+import { WebhookResponse } from './model'
 import type Stripe from 'stripe'
 
 export const paymentsPlugin = new Elysia({ name: 'payments', prefix: '/webhooks' })
   .post('/stripe', async ({ request, set }) => {
+    // No body schema — raw body must be read before any parsing for HMAC verification
     // CRITICAL: call request.text() BEFORE any body parsing
     const rawBody = await request.text()
     const signature = request.headers.get('stripe-signature') ?? ''
@@ -33,4 +35,6 @@ export const paymentsPlugin = new Elysia({ name: 'payments', prefix: '/webhooks'
     }
 
     return { received: true }
+  }, {
+    response: { 200: WebhookResponse }
   })

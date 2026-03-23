@@ -2,14 +2,23 @@
 import { Elysia, t } from 'elysia'
 import { authPlugin } from '../auth/index'
 import { requireRole } from '../auth/require-role'
-import { CreateOrderBody } from './model'
+import {
+  CreateOrderBody,
+  MenuItemSchema,
+  CreatedOrderSchema,
+  OrderHistoryItemSchema,
+  PayIntentSchema
+} from './model'
 import { createOrder, getActiveMenu, getOrderHistory } from './service'
 import { createPaymentIntent } from '../payments/service'
 
 export const consumerPlugin = new Elysia({ name: 'consumer', prefix: '/consumer' })
   .use(authPlugin)
   .use(requireRole('customer'))
-  .get('/menu', () => getActiveMenu(), { auth: true })
+  .get('/menu', () => getActiveMenu(), {
+    auth: true,
+    response: t.Array(MenuItemSchema)
+  })
   .post(
     '/orders',
     async ({ body, user, status }) => {
@@ -23,12 +32,19 @@ export const consumerPlugin = new Elysia({ name: 'consumer', prefix: '/consumer'
       }
       return result.order
     },
-    { auth: true, body: CreateOrderBody }
+    {
+      auth: true,
+      body: CreateOrderBody,
+      response: { 200: CreatedOrderSchema }
+    }
   )
   .get(
     '/orders',
     async ({ user }) => getOrderHistory(user.id),
-    { auth: true }
+    {
+      auth: true,
+      response: t.Array(OrderHistoryItemSchema)
+    }
   )
   .post(
     '/orders/:id/pay',
@@ -43,6 +59,7 @@ export const consumerPlugin = new Elysia({ name: 'consumer', prefix: '/consumer'
     },
     {
       auth: true,
-      params: t.Object({ id: t.String({ format: 'uuid' }) })
+      params: t.Object({ id: t.String({ format: 'uuid' }) }),
+      response: { 200: PayIntentSchema }
     }
   )

@@ -1,9 +1,9 @@
 // src/plugins/health/index.ts
 // GET /health — UNPROTECTED (no authPlugin, no requireRole)
 // Returns Neon connectivity status (SELECT 1 probe) and process uptime.
-// Required by Phase 1 success criteria item 1.
 import { Elysia } from 'elysia'
 import { db } from '../../db/client'
+import { HealthResponse } from './model'
 
 export const healthPlugin = new Elysia({ name: 'health', prefix: '/health' })
   .get('/', async () => {
@@ -24,4 +24,6 @@ export const healthPlugin = new Elysia({ name: 'health', prefix: '/health' })
       db: dbStatus,
       uptime: process.uptime()
     }
+  }, {
+    response: HealthResponse
   })

@@ -43,6 +43,13 @@
       "when": 1773827508636,
       "tag": "0005_payment_intents",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1773915869694,
+      "tag": "0006_tranquil_proteus",
+      "breakpoints": true
     }
   ]
 }

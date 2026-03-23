@@ -16,7 +16,7 @@ export const itemStatusEnum = pgEnum('item_status', ['pending', 'preparing', 're
 
 export const orders = pgTable('orders', {
   id: uuid('id').primaryKey().defaultRandom(),
-  customerId: uuid('customer_id').notNull(),
+  customerId: text('customer_id').notNull(),
   status: orderStatusEnum('status').notNull().default('pending'),
   totalAmount: numeric('total_amount', { precision: 10, scale: 2 }).notNull(),
   tenantId: uuid('tenant_id'),

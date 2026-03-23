@@ -1,7 +1,7 @@
 import { Elysia } from 'elysia'
 import { authPlugin } from '../auth/index'
 import { requireRole } from '../auth/require-role'
-import { UpdateLocationBody } from './model'
+import { UpdateLocationBody, UpdateLocationResponse } from './model'
 import { updateCourierLocation } from './service'
 
 export const couriersPlugin = new Elysia({ name: 'couriers', prefix: '/couriers' })
@@ -19,5 +19,9 @@ export const couriersPlugin = new Elysia({ name: 'couriers', prefix: '/couriers'
       }
       return { ok: true, written: result.written }
     },
-    { auth: true, body: UpdateLocationBody }
+    {
+      auth: true,
+      body: UpdateLocationBody,
+      response: { 200: UpdateLocationResponse }
+    }
   )
