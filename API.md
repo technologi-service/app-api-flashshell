@@ -180,12 +180,15 @@ Response `200`:
   "status": "pending",
   "totalAmount": "25.50",
   "deliveryAddress": "Calle Falsa 123, Piso 4",
+  "expiresAt": "2026-03-24T10:30:00.000Z",
   "items": [
     { "itemId": "uuid", "name": "Hamburguesa Clasica", "quantity": 2, "unitPrice": "8.50" },
     { "itemId": "uuid", "name": "Papas Fritas", "quantity": 1, "unitPrice": "8.50" }
   ]
 }
 ```
+
+`expiresAt` marca el limite de 30 minutos para completar el pago. Pasado ese tiempo la orden se cancela automaticamente y el WebSocket envia `order_expired`. Mostrar un countdown en pantalla usando este valor.
 
 Error `409` (sin stock o item no disponible):
 ```json
@@ -208,20 +211,41 @@ Response `200`:
 { "clientSecret": "pi_xxx_secret_yyy" }
 ```
 
-Usar el `clientSecret` con Stripe.js para confirmar el pago en el frontend:
+Errores HTTP:
+| Status | `error` | Que mostrar |
+|--------|---------|------------|
+| `404` | `NOT_FOUND` | Pedido no encontrado |
+| `409` | `ORDER_NOT_PENDING` | El pedido ya fue procesado |
+| `409` | `INSUFFICIENT_STOCK` | Uno o mas productos ya no estan disponibles |
+| `410` | `ORDER_EXPIRED` | El pedido expiro — redirigir a menu para hacer uno nuevo |
+
+**Paso 1 — Conectar WebSocket ANTES de confirmar el pago:**
 ```js
-const stripe = Stripe('pk_test_...')
-const { error } = await stripe.confirmPayment({
-  clientSecret: response.clientSecret,
-  confirmParams: { return_url: 'https://tuapp.com/order-confirmed' }
-})
+const ws = new WebSocket(`ws://localhost:3001/ws/order:${orderId}`)
 ```
 
-Cuando Stripe confirma el pago, el backend recibe un webhook y cambia la orden a `confirmed` automaticamente.
+**Paso 2 — Confirmar pago con Stripe.js:**
+```js
+const stripe = Stripe('pk_test_...')
+const { error } = await stripe.confirmCardPayment(clientSecret, {
+  payment_method: {
+    card: cardElement,
+    billing_details: { name: 'Nombre del cliente' }
+  }
+})
 
-Errores:
-- `404`: Orden no encontrada
-- `409`: Orden ya no esta en estado `pending`
+if (error) {
+  // Stripe rechazo localmente — mostrar error.message
+  // El evento payment_failed llegara por WebSocket con el motivo detallado
+} else {
+  // Pago enviado — mostrar spinner y esperar confirmacion por WebSocket
+  // NO asumir confirmado aqui: el stock se verifica en el servidor al recibir el webhook
+}
+```
+
+**IMPORTANTE**: No confiar en la respuesta de `stripe.confirmCardPayment()` para mostrar "confirmado". El estado oficial siempre llega por WebSocket (`order_confirmed` o `order_cancelled`). Stripe puede reportar exito pero el stock podria haberse agotado en ese instante.
+
+Si se llama `/pay` varias veces sobre la misma orden, el servidor cancela automaticamente el PaymentIntent anterior y crea uno nuevo. El `clientSecret` anterior queda invalido.
 
 ### Historial de pedidos
 
@@ -485,12 +509,30 @@ Enviar `"ping"` periodicamente. El servidor responde `"pong"`.
 
 **Canal `order:{orderId}`** (customer):
 ```json
+// Pago confirmado — cocina recibe la orden
 { "channel": "order:uuid", "event": "order_confirmed", "orderId": "uuid", "status": "confirmed" }
+
+// Pago rechazado — informar motivo y permitir reintento (max 3 veces)
+{ "channel": "order:uuid", "event": "payment_failed", "orderId": "uuid", "reason": "Fondos insuficientes", "attemptsRemaining": 2, "message": "El pago no se ha podido procesar. Te quedan 2 intentos." }
+
+// Orden cancelada (3 fallos, stock agotado tras pagar, o pago cancelado)
+{ "channel": "order:uuid", "event": "order_cancelled", "orderId": "uuid", "reason": "Descripcion del motivo" }
+
+// Orden expirada (30 min sin pagar)
+{ "channel": "order:uuid", "event": "order_expired", "orderId": "uuid", "reason": "Tu pedido ha expirado. No se completo el pago en los 30 minutos disponibles." }
+
+// Seguimiento post-confirmacion
 { "channel": "order:uuid", "event": "item_status_changed", "orderId": "uuid", "itemId": "uuid", "status": "preparing" }
 { "channel": "order:uuid", "event": "order_status_changed", "orderId": "uuid", "status": "ready_for_pickup" }
 { "channel": "order:uuid", "event": "order_picked_up", "orderId": "uuid", "courierId": "string" }
 { "channel": "order:uuid", "event": "order_delivered", "orderId": "uuid" }
 ```
+
+Logica recomendada para el canal `order:{orderId}`:
+- `order_confirmed` → mostrar "Pedido confirmado, la cocina lo esta preparando" y pasar a pantalla de seguimiento
+- `payment_failed` → mostrar `event.message` con motivo + boton "Intentar de nuevo" (volver a llamar `/pay`)
+- `order_cancelled` → mostrar `event.reason` + boton "Volver al menu" (estado terminal)
+- `order_expired` → mostrar `event.reason` + boton "Hacer nuevo pedido" (estado terminal)
 
 **Canal `kds`** (chef):
 ```json
@@ -531,6 +573,7 @@ Todos los errores siguen este formato:
 | 403 | `FORBIDDEN` | Rol incorrecto → no mostrar esa seccion |
 | 404 | `NOT_FOUND` | Recurso no existe |
 | 409 | `CONFLICT` | Estado invalido (sin stock, orden ya tomada, etc) |
+| 410 | `ORDER_EXPIRED` | La ventana de 30 min para pagar ha expirado → redirigir a menu |
 | 422 | `VALIDATION_ERROR` | Body mal formado (tiene campo `details` con array de errores) |
 
 ---
@@ -553,11 +596,15 @@ Ejecutar `bun run db:seed:roles` en el backend para crear estos usuarios:
 ### 1. Customer: crear y pagar pedido
 1. `POST /api/auth/sign-up/email` → registrar usuario
 2. `GET /consumer/menu` → mostrar menu
-3. `POST /consumer/orders` → crear pedido con items del menu
-4. `POST /consumer/orders/:id/pay` → obtener `clientSecret`
-5. Confirmar pago con Stripe.js
-6. Conectar WebSocket a `ws://localhost:3001/ws/order:{orderId}`
-7. Esperar evento `order_confirmed`
+3. `POST /consumer/orders` → crear pedido — guardar `id` y mostrar countdown con `expiresAt`
+4. **Conectar WebSocket a `ws://localhost:3001/ws/order:{orderId}`** — antes de pagar
+5. `POST /consumer/orders/:id/pay` → obtener `clientSecret`
+6. Confirmar pago con `stripe.confirmCardPayment(clientSecret, ...)`
+7. Mostrar spinner — esperar evento por WebSocket:
+   - `order_confirmed` → ir a pantalla de seguimiento
+   - `payment_failed` → mostrar motivo + boton reintentar (volver al paso 5)
+   - `order_cancelled` → mostrar motivo, estado terminal
+   - `order_expired` → pedido caducado, volver al menu
 
 ### 2. Chef: preparar pedido
 1. `POST /api/auth/sign-in/email` → login como chef

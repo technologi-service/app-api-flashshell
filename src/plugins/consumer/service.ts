@@ -6,11 +6,8 @@ import { orders } from '../../db/schema/orders'
 import { eq } from 'drizzle-orm'
 import { sql } from 'drizzle-orm'
 
-// pg.Pool for transactional queries (SELECT FOR UPDATE requires persistent connection)
-// Uses DATABASE_DIRECT_URL (not the pooled URL) because Neon PgBouncer transaction mode
-// does not preserve row locks (SELECT FOR UPDATE) across queries within a transaction —
-// different queries in the same BEGIN/COMMIT block can land on different backend connections.
-// DATABASE_DIRECT_URL bypasses PgBouncer and connects directly to the Neon compute instance.
+// pg.Pool para escrituras transaccionales (order + order_items en un solo COMMIT).
+// Usamos DATABASE_DIRECT_URL para evitar PgBouncer transaction mode.
 const txPool = new Pool({
   connectionString: process.env.DATABASE_DIRECT_URL ?? process.env.DATABASE_URL,
   max: 5
@@ -26,18 +23,13 @@ export interface CreatedOrder {
   status: string
   totalAmount: string
   deliveryAddress: string
+  expiresAt: Date
   items: Array<{ itemId: string; name: string; quantity: number; unitPrice: string }>
 }
 
 export type CreateOrderResult =
-  | {
-      ok: true
-      order: CreatedOrder
-    }
-  | {
-      ok: false
-      failures: string[]
-    }
+  | { ok: true; order: CreatedOrder }
+  | { ok: false; failures: string[] }
 
 export async function createOrder(
   customerId: string,
@@ -50,22 +42,7 @@ export async function createOrder(
 
     const menuItemIds = items.map(i => i.menuItemId)
 
-    // Lock ingredient rows for all menu items in this order.
-    // Step 1: Lock ingredients rows directly to prevent concurrent stock depletion.
-    // We use a separate SELECT FOR UPDATE on ingredients via a subquery to avoid
-    // the PostgreSQL restriction that FOR UPDATE cannot target the nullable side
-    // of an outer join. Only locks rows where ingredients exist for the menu items.
-    await client.query(
-      `SELECT i.id FROM ingredients i
-       WHERE i.id IN (
-         SELECT mii.ingredient_id FROM menu_item_ingredients mii
-         WHERE mii.menu_item_id = ANY($1::uuid[])
-       )
-       FOR UPDATE`,
-      [menuItemIds]
-    )
-
-    // Step 2: Read menu item data with ingredient stock (no lock needed — already locked above).
+    // Leer datos de menú e ingredientes (sin bloqueo — solo validación previa al pago)
     const { rows: menuRows } = await client.query<{
       menu_item_id: string
       name: string
@@ -90,7 +67,7 @@ export async function createOrder(
       [menuItemIds]
     )
 
-    // Aggregate stock requirements per menu item
+    // Agrupar por ítem
     type MenuAgg = {
       name: string
       price: string
@@ -116,7 +93,7 @@ export async function createOrder(
       }
     }
 
-    // Validate — collect ALL failures before rejecting
+    // Validar disponibilidad — recopilar TODOS los fallos antes de rechazar
     const failures: string[] = []
     for (const item of items) {
       const menu = menuMap.get(item.menuItemId)
@@ -137,35 +114,27 @@ export async function createOrder(
       return { ok: false, failures }
     }
 
-    // Decrement ingredient stock — must happen inside the transaction, after validation,
-    // before INSERT. This atomically consumes the reserved stock.
-    for (const item of items) {
-      const menu = menuMap.get(item.menuItemId)!
-      for (const ing of menu.ingredients) {
-        await client.query(
-          `UPDATE ingredients
-           SET stock_quantity = stock_quantity - $1
-           WHERE id = $2`,
-          [item.quantity * ing.quantityUsed, ing.id]
-        )
-      }
-    }
+    // IMPORTANTE: el stock NO se decrementa aquí.
+    // El decremento ocurre en el webhook payment_intent.succeeded, dentro de una
+    // transacción con SELECT FOR UPDATE sobre los ingredientes, garantizando que
+    // solo se descuenta stock cuando el pago es confirmado por Stripe.
 
-    // Insert order
     const totalAmount = items.reduce((sum, item) => {
       const price = Number(menuMap.get(item.menuItemId)!.price)
       return sum + price * item.quantity
     }, 0).toFixed(2)
 
-    const { rows: orderRows } = await client.query<{ id: string }>(
-      `INSERT INTO orders (customer_id, status, total_amount, delivery_address)
-       VALUES ($1, 'pending', $2, $3)
-       RETURNING id`,
+    // Insertar orden — expires_at = 30 minutos desde ahora
+    const { rows: orderRows } = await client.query<{ id: string; expires_at: Date }>(
+      `INSERT INTO orders (customer_id, status, total_amount, delivery_address, expires_at)
+       VALUES ($1, 'pending', $2, $3, NOW() + INTERVAL '30 minutes')
+       RETURNING id, expires_at`,
       [customerId, totalAmount, deliveryAddress]
     )
     const orderId = orderRows[0].id
+    const expiresAt = orderRows[0].expires_at
 
-    // Insert order items
+    // Insertar ítems de la orden
     const orderItemsResult: CreatedOrder['items'] = []
     for (const item of items) {
       const menu = menuMap.get(item.menuItemId)!
@@ -183,9 +152,6 @@ export async function createOrder(
       })
     }
 
-    // KDS pg_notify is deferred to Plan 05-02 webhook handler —
-    // orders are now 'pending' until Stripe payment_intent.succeeded is received.
-
     await client.query('COMMIT')
 
     return {
@@ -195,6 +161,7 @@ export async function createOrder(
         status: 'pending',
         totalAmount,
         deliveryAddress,
+        expiresAt,
         items: orderItemsResult
       }
     }

@@ -23,7 +23,8 @@ export const orders = pgTable('orders', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
   courierId: text('courier_id'),                    // nullable, FK to user.id (text PK)
-  deliveryAddress: text('delivery_address').notNull()
+  deliveryAddress: text('delivery_address').notNull(),
+  expiresAt: timestamp('expires_at')                // null = no expiry; set to created_at + 30min for pending orders
 })
 
 export const orderItems = pgTable('order_items', {

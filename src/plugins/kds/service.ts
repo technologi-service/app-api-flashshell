@@ -127,6 +127,15 @@ export async function updateItemStatus(
           status: 'ready_for_pickup'
         })}::text)`
       )
+
+      // Notify admin dashboard
+      await db.execute(
+        sql`SELECT pg_notify('flashshell_events', ${JSON.stringify({
+          channel: 'control',
+          event: 'order_ready_for_pickup',
+          orderId
+        })}::text)`
+      )
     }
   }
 

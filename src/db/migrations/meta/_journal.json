@@ -50,6 +50,13 @@
       "when": 1773915869694,
       "tag": "0006_tranquil_proteus",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1774345810693,
+      "tag": "0007_tense_senator_kelly",
+      "breakpoints": true
     }
   ]
 }

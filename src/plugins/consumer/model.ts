@@ -37,6 +37,7 @@ export const CreatedOrderSchema = t.Object({
   status: t.String(),
   totalAmount: t.String(),
   deliveryAddress: t.String(),
+  expiresAt: t.Date({ description: 'La orden expira si no se paga antes de esta fecha (30 minutos desde la creación)' }),
   items: t.Array(OrderItemCreatedSchema)
 })
 
@@ -49,4 +50,9 @@ export const OrderHistoryItemSchema = t.Object({
 
 export const PayIntentSchema = t.Object({
   clientSecret: t.String()
+})
+
+export const ErrorSchema = t.Object({
+  error: t.String(),
+  message: t.String()
 })

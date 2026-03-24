@@ -14,6 +14,7 @@ import { logisticsPlugin } from './plugins/logistics/index'
 import { couriersPlugin } from './plugins/couriers/index'
 import { controlPlugin } from './plugins/control/index'
 import { paymentsPlugin } from './plugins/payments/index'
+import { startExpireOrdersJob } from './jobs/expire-orders'
 
 const isDev = process.env.NODE_ENV !== 'production'
 
@@ -335,6 +336,7 @@ The only supported client message is \`"ping"\` — the server replies \`"pong"\
     if (isDev) {
       console.log(`📖 Documentación: ${baseUrl}/openapi`)
     }
+    startExpireOrdersJob()
   })
 
 /**
